@@ -30,7 +30,7 @@
     ]
   },
   "scripts": {
-    "build": "pkg . --out-path ./dist",
+    "build": "pkg . --out-path ./dist --icon ./assets/icon.ico",
     "start": "rule-process -s",
     "start:demo": "rule-process demo",
     "start:build": "rule-process build",
