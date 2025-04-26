@@ -1,6 +1,6 @@
 {
   "name": "rule-process",
-  "version": "1.1.0",
+  "version": "1.1.0-bate0.0.2",
   "description": "file rule processing tool",
   "main": "./src/main.js",
   "bin": {
@@ -30,7 +30,7 @@
     ]
   },
   "scripts": {
-    "build": "pkg . --out-path ./dist --icon ./assets/icon.ico",
+    "build": "pkg . --out-path ./dist ",
     "start": "rule-process -s",
     "start:demo": "rule-process demo",
     "start:build": "rule-process build",
@@ -39,7 +39,7 @@
     "toLogin": "npm run npmjs & npm login",
     "patch": "npm version patch",
     "toPublish": "publish.bat & move /Y package.json.bak package.json",
-    "toUnpublish": "npm unpublish rule-process@1.0.12 --force"
+    "toUnpublish": "npm unpublish rule-process@1.1.0-bate0.0.2 --force"
   },
   "keywords": [
     "cli",
