@@ -1,6 +1,6 @@
 {
   "name": "rule-process",
-  "version": "1.0.4_bate0.0.1",
+  "version": "1.1.0",
   "description": "file rule processing tool",
   "main": "./src/main.js",
   "files": [
@@ -33,9 +33,10 @@
     "start:build": "rule-process build",
     "npmjs": "npm config set registry https://registry.npmjs.org/",
     "mirror": "npm config set registry https://registry.npmmirror.com/",
-    "login": "npm run npmjs & npm login",
+    "toLogin": "npm run npmjs & npm login",
     "patch": "npm version patch",
-    "publish": "publish.bat"
+    "toPublish": "publish.bat & move /Y package.json.bak package.json",
+    "toUnpublish": "npm unpublish rule-process@1.0.12 --force"
   },
   "keywords": [
     "cli",
