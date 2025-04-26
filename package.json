@@ -37,7 +37,7 @@
     "npmjs": "npm config set registry https://registry.npmjs.org/",
     "mirror": "npm config set registry https://registry.npmmirror.com/",
     "login": "npm run npmjs & npm login",
-    "publish": "npm version patch & ./publish.bat"
+    "publish": "npm version patch & publish.bat"
   },
   "keywords": [
     "cli",
