@@ -6,6 +6,11 @@
   "bin": {
     "rule-process": "./src/cli.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Geoffwo/file-rule-process.git"
+  },
+  "homepage": "https://gitee.com/Geoffwo/file-rule-process.git#readme",
   "dependencies": {
     "commander": "^11.1.0",
     "fs-extra": "^11.3.0"
@@ -24,7 +29,9 @@
   },
   "scripts": {
     "build": "pkg . --out-path ./dist",
-    "start:example": "rule-process build"
+    "start": "rule-process -s",
+    "start:demo": "rule-process demo",
+    "start:build": "rule-process build"
   },
   "author": "geoffwo",
   "license": "ISC",

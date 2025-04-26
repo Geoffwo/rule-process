@@ -1,0 +1,16 @@
+src/
+examples/
+assets/
+test/
+tests/
+
+*.log
+*.bat
+*.sh
+node_modules/
+.DS_Store
+.vscode/
+.idea/
+.env
+.gitignore
+index.js
