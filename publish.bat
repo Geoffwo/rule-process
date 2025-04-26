@@ -9,6 +9,12 @@ REM 发布到 npm
 npm publish
 
 REM 恢复 package.json
-move /Y package.json.bak package.json
+copy /Y package.json.bak package.json
+
+REM 删除备份文件
+del package.json.bak
+
+REM 延时5秒
+timeout /t 5
 
 pause
