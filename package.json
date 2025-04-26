@@ -1,11 +1,16 @@
 {
   "name": "rule-process",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "file rule processing tool",
   "main": "./src/main.js",
   "bin": {
     "rule-process": "./src/cli.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "README-zh.md"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/Geoffwo/file-rule-process.git"
@@ -14,9 +19,6 @@
   "dependencies": {
     "commander": "^11.1.0",
     "fs-extra": "^11.3.0"
-  },
-  "engines": {
-    "node": ">=14.18.0"
   },
   "pkg": {
     "assets": [
@@ -31,7 +33,26 @@
     "build": "pkg . --out-path ./dist",
     "start": "rule-process -s",
     "start:demo": "rule-process demo",
-    "start:build": "rule-process build"
+    "start:build": "rule-process build",
+    "npmjs": "npm config set registry https://registry.npmjs.org/",
+    "mirror": "npm config set registry https://registry.npmmirror.com/",
+    "login": "npm run npmjs & npm login",
+    "publish": "npm version patch & ./publish.bat"
+  },
+  "keywords": [
+    "cli",
+    "file-processing",
+    "rules-engine",
+    "file-conversion",
+    "command-line-tool",
+    "build-tool",
+    "automation",
+    "file-management",
+    "rule-based-processing",
+    "productivity"
+  ],
+  "engines": {
+    "node": ">=14.18.0"
   },
   "author": "geoffwo",
   "license": "ISC",
