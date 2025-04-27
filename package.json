@@ -18,7 +18,8 @@
   "homepage": "https://gitee.com/Geoffwo/file-rule-process.git#readme",
   "dependencies": {
     "commander": "^11.1.0",
-    "fs-extra": "^11.3.0"
+    "fs-extra": "^11.3.0",
+    "pe-library": "^1.0.1"
   },
   "pkg": {
     "assets": [
@@ -30,7 +31,8 @@
     ]
   },
   "scripts": {
-    "build": "pkg . --out-path ./dist ",
+    "build": "pkg . --out-path ./dist",
+    "icon": "node build-icon.js",
     "start": "rule-process -s",
     "start:demo": "rule-process demo",
     "start:build": "rule-process build",
@@ -38,7 +40,9 @@
     "mirror": "npm config set registry https://registry.npmmirror.com/",
     "toLogin": "npm run npmjs & npm login",
     "patch": "npm version patch",
-    "toPublish": "publish.bat & move /Y package.json.bak package.json",
+    "toCopy": "./config/copyPackage.bat",
+    "toRestore": "move /Y package.json.bak package.json",
+    "toPublish": "npm run toCopy & npm push & npm run toRestore",
     "toUnpublish": "npm unpublish rule-process@1.1.0-bate0.0.2 --force"
   },
   "keywords": [
@@ -59,6 +63,7 @@
   "author": "geoffwo",
   "license": "ISC",
   "devDependencies": {
-    "pkg": "^5.8.1"
+    "pkg": "^5.8.1",
+    "resedit": "^2.0.3"
   }
 }
