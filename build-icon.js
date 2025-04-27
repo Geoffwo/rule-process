@@ -41,3 +41,16 @@ async function main() {
 }
 
 main().catch(err => console.error('❌ 错误:', err.message));
+
+/** 绘制自定义icon图标步骤
+ * 1. 画图
+ * https://www.canva.cn 创建设计-自定义模板-256*256
+ * 2. 转化为透明png【可选】
+ * https://www.iloveimg.com/zh-cn/remove-background
+ * 3. png to ico
+ * https://www.aconvert.com/cn/icon/png-to-ico/ 勾选多个16x16、32x32、48x48、256x256 等，至少四个
+ */
+
+/**
+ * 打包结束后，打开任意目录，打开任务管理器，找到“Windows资源管理器”，右键选择“重新启动”，更新图标
+ */
