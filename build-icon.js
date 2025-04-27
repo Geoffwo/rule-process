@@ -3,7 +3,6 @@ const path = require('path');
 
 async function main() {
     const ResEdit = await import('resedit');
-    // import * as PELibrary from 'pe-library';
     const PELibrary = await import('pe-library');
 
     const exePath = path.join(__dirname, 'dist', 'rule-process.exe');
@@ -26,12 +25,17 @@ async function main() {
     // 调用图标替换函数 （32512是Windows默认主图标ID）
     ResEdit.Resource.IconGroupEntry.replaceIconsForResource(
         res.entries,           // 目标资源条目集合
-        101,                   // 要替换的图标组资源ID（需与原始EXE中定义的ID一致）
-        0,                  // 语言ID（1033对应en-US）
+        1,                   // 要替换的图标组资源ID（需与原始EXE中定义的ID一致）
+        1033,                  // 语言ID（1033对应en-US）
         iconFile.icons.map(    // 将ICO文件中的图标转换为资源格式
             (item) => item.data  // 提取每个图标的二进制数据
         )
     );
+
+    // 保存修改后的资源到EXE
+    res.outputResource(exe); // 将资源写回PE对象
+    const newExeData = exe.generate(); // 生成新的EXE二进制数据
+    fs.writeFileSync(exePath, Buffer.from(newExeData)); // 覆盖原EXE文件
 
     console.log('✅ 图标更新成功');
 }
