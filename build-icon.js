@@ -25,7 +25,7 @@ async function main() {
     // 调用图标替换函数 （32512是Windows默认主图标ID）
     ResEdit.Resource.IconGroupEntry.replaceIconsForResource(
         res.entries,           // 目标资源条目集合
-        1,                   // 要替换的图标组资源ID（需与原始EXE中定义的ID一致）
+        1,                   // 需要用ResourceHacker确认ID,要替换的图标组资源ID（需与原始EXE中定义的ID一致）
         1033,                  // 语言ID（1033对应en-US）
         iconFile.icons.map(    // 将ICO文件中的图标转换为资源格式
             (item) => item.data  // 提取每个图标的二进制数据

@@ -31,19 +31,22 @@
     ]
   },
   "scripts": {
-    "build": "pkg . --out-path ./dist",
-    "icon": "node build-icon.js",
+    "build": "npm run build:pkg & npm run build:icon",
+    "build:pkg": "pkg . --out-path ./dist",
+    "build:icon": "node build-icon.js",
+
     "start": "rule-process -s",
     "start:demo": "rule-process demo",
     "start:build": "rule-process build",
-    "npmjs": "npm config set registry https://registry.npmjs.org/",
-    "mirror": "npm config set registry https://registry.npmmirror.com/",
-    "toLogin": "npm run npmjs & npm login",
-    "patch": "npm version patch",
-    "toCopy": "./config/copyPackage.bat",
-    "toRestore": "move /Y package.json.bak package.json",
-    "toPublish": "npm run toCopy & npm push & npm run toRestore",
-    "toUnpublish": "npm unpublish rule-process@1.1.0-bate0.0.2 --force"
+
+    "registry:npm": "npm config set registry https://registry.npmjs.org/",
+    "registry:mirror": "npm config set registry https://registry.npmmirror.com/",
+    "login:npm": "npm run registry:npm & npm login",
+    "version:patch": "npm version patch",
+    "package:copy": "./config/copyPackage.bat",
+    "package:restore": "move /Y package.json.bak package.json",
+    "publish:all": "npm run package:copy & npm publish & npm run package:restore",
+    "unpublish:force": "npm unpublish rule-process@1.1.0-bate0.0.2 --force"
   },
   "keywords": [
     "cli",
