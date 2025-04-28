@@ -1,6 +1,6 @@
 {
   "name": "rule-process",
-  "version": "1.1.0-bate0.0.4",
+  "version": "1.2.0",
   "description": "file rule processing tool",
   "bin": {
     "rule-process": "./src/cli.js"
@@ -42,7 +42,7 @@
     "package:copy": "config\\copyPackage.bat",
     "package:restore": "move /Y package.json.bak package.json",
     "publish:all": "npm run package:copy & npm publish & npm run package:restore",
-    "unpublish:force": "npm unpublish rule-process@1.1.0-bate0.0.3 --force"
+    "unpublish:force": "npm unpublish rule-process@1.1.0-bate0.0.4 --force"
   },
   "keywords": [
     "cli",
