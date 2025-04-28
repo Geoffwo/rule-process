@@ -223,7 +223,8 @@ function getOutputNodeTemplate(outputPath) {
     path: outputPath,//导出路径
     isDirectory: false,//是否是目录，布尔值 true/false
     content: '',//内容
-    append: false // 是否追加，布尔值 true/false
+    append: false, // 是否追加，布尔值 true/false
+    ext:'js',//【可选】导出文件类型
   }
 }
 
@@ -294,7 +295,7 @@ function processOutputArray(outputArray) {
     if (!node.isDirectory) {
       // 自动处理目录型路径：当路径以目录分隔符结尾或没有扩展名时，添加默认文件名
       if (shouldAutoCreateFilename(fullPath)) {
-        fullPath = path.join(fullPath, 'result.js'); // 默认文件名
+        fullPath = path.join(fullPath, `result.${node.ext}`); // 默认文件名
         logStep(`自动修正文件路径为: ${fullPath}`)
       }
     }
