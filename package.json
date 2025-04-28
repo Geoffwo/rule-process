@@ -39,8 +39,8 @@
     "registry:mirror": "npm config set registry https://registry.npmmirror.com/",
     "login:npm": "npm run registry:npm & npm login",
     "version:patch": "npm version patch",
-    "package:copy": "config\\copyPackage.bat",
-    "package:restore": "move /Y package.json.bak package.json",
+    "package:copy": "node ./config/copyPackage.js",
+    "package:restore": "node config/restorePackage.js",
     "publish:all": "npm run package:copy & npm publish & npm run package:restore",
     "unpublish:force": "npm unpublish rule-process@1.1.0-bate0.0.4 --force"
   },
