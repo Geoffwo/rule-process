@@ -5,8 +5,8 @@ async function main() {
     const ResEdit = await import('resedit');
     const PELibrary = await import('pe-library');
 
-    const exePath = path.join(__dirname, 'dist', 'rule-process.exe');
-    const icoPath = path.join(__dirname, 'assets', 'icon.ico');
+    const exePath = path.join(process.cwd(), 'dist', 'rule-process.exe');
+    const icoPath = path.join(process.cwd(), 'assets', 'icon.ico');
 
     if (!fs.existsSync(exePath)) throw new Error(`EXE 未生成，请先运行 pkg 命令: ${exePath}`);
     if (!fs.existsSync(icoPath)) throw new Error(`图标文件不存在: ${icoPath}`);
@@ -31,6 +31,36 @@ async function main() {
             (item) => item.data  // 提取每个图标的二进制数据
         )
     );
+
+
+    // 修改版本信息资源部分
+    const viList = ResEdit.Resource.VersionInfo.fromEntries(res.entries);
+    const vi = viList[0];
+
+    /* 版本号配置说明
+        - 参数格式：主版本.次版本.补丁号.构建号
+        - 建议遵循语义化版本规范：https://semver.org
+        - 1033 表示英语(美国)语言ID */
+    vi.setFileVersion(1, 0, 0, 0, 1033);  // 文件版本：v1.0.0.0
+    // vi.setProductVersion(1, 0, 0, 0, 1033); // 产品版本：v1.0.0.0
+
+    // 设置版本字符串信息（1200表示Unicode代码页）
+    vi.setStringValues(
+        // 语言：英语(美国)  编码：Unicode
+        { lang: 1033, codepage: 1200 },
+        {
+            CompanyName: 'geoffwo',      // 开发者/公司名称
+            FileDescription: '规则处理引擎 - rule-process', // 文件描述
+            FileVersion: '1.0.0.0',     // 显示在资源管理器的版本
+            InternalName: 'rule-process', // 内部名称
+            LegalCopyright: '© 2024 geoffwo. 保留所有权利。', // 版权声明
+            OriginalFilename: 'rule-process.exe', // 原始文件名
+            ProductName: '智能规则处理器 (rule-process)', // 产品名称
+            ProductVersion: '1.0',      // 显示给用户的简化版本
+        }
+    );
+    // 将版本信息写回资源条目（true表示自动创建缺失的目录结构）
+    vi.outputToResourceEntries(res.entries);
 
     // 保存修改后的资源到EXE
     res.outputResource(exe); // 将资源写回PE对象

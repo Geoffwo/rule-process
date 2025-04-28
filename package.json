@@ -31,9 +31,9 @@
     ]
   },
   "scripts": {
-    "build": "npm run build:pkg & npm run build:icon",
+    "build": "npm run build:pkg & npm run build:rewrite",
     "build:pkg": "pkg . --out-path ./dist",
-    "build:icon": "node build-icon.js",
+    "build:rewrite": "node ./config/build-rewrite.js",
 
     "start": "rule-process -s",
     "start:demo": "rule-process demo",
