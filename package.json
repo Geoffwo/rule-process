@@ -1,8 +1,7 @@
 {
   "name": "rule-process",
-  "version": "1.1.0-bate0.0.2",
+  "version": "1.1.0-bate0.0.4",
   "description": "file rule processing tool",
-  "main": "./src/main.js",
   "bin": {
     "rule-process": "./src/cli.js"
   },
@@ -16,11 +15,6 @@
     "url": "https://github.com/Geoffwo/file-rule-process.git"
   },
   "homepage": "https://gitee.com/Geoffwo/file-rule-process.git#readme",
-  "dependencies": {
-    "commander": "^11.1.0",
-    "fs-extra": "^11.3.0",
-    "pe-library": "^1.0.1"
-  },
   "pkg": {
     "assets": [
       "examples/**/*"
@@ -39,14 +33,16 @@
     "start:demo": "rule-process demo",
     "start:build": "rule-process build",
 
+    "test:esbuild": "node ./config/esbuild.js",
+
     "registry:npm": "npm config set registry https://registry.npmjs.org/",
     "registry:mirror": "npm config set registry https://registry.npmmirror.com/",
     "login:npm": "npm run registry:npm & npm login",
     "version:patch": "npm version patch",
-    "package:copy": "./config/copyPackage.bat",
+    "package:copy": "config\\copyPackage.bat",
     "package:restore": "move /Y package.json.bak package.json",
     "publish:all": "npm run package:copy & npm publish & npm run package:restore",
-    "unpublish:force": "npm unpublish rule-process@1.1.0-bate0.0.2 --force"
+    "unpublish:force": "npm unpublish rule-process@1.1.0-bate0.0.3 --force"
   },
   "keywords": [
     "cli",
@@ -66,6 +62,13 @@
   "author": "geoffwo",
   "license": "ISC",
   "devDependencies": {
+    "@babel/core": "^7.26.10",
+    "@babel/plugin-transform-modules-commonjs": "^7.26.3",
+    "@babel/preset-env": "^7.26.9",
+    "commander": "^11.1.0",
+    "esbuild": "^0.25.2",
+    "fs-extra": "^11.3.0",
+    "pe-library": "^1.0.1",
     "pkg": "^5.8.1",
     "resedit": "^2.0.3"
   }

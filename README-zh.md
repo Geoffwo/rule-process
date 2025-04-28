@@ -60,7 +60,7 @@ npm run start:example
 │       └── rule.js    
 ├── src/               # 源代码
 │   ├── cli.js         # 命令行接口
-│   └── main.js        # 核心逻辑
+│   └── core.js        # 核心逻辑
 ├── package.json
 └── README.md
 ```

@@ -7,3 +7,7 @@ node -e "let pkg=require('./package.json');delete pkg.bin;require('fs').writeFil
 
 REM 发布到 npm
 REM npm publish
+
+REM 正在执行操作，3秒后继续...
+REM timeout /T 3 /NOBREAK
+REM 继续执行后续操作

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const { program } = require('commander')
-const ruleProcess = require('./main')
+const ruleProcess = require('./index')
 
 // 双击窗口显示帮助 isTTY是false
 if (process.argv.length === 2) {
