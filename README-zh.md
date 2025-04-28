@@ -59,8 +59,8 @@ npm run start:example
 │   └── ruleDir/       # 规则文件
 │       └── rule.js    
 ├── src/               # 源代码
-│   ├── cli.js         # 命令行接口
-│   └── core.js        # 核心逻辑
+│   ├── index.js         # 命令行接口
+│   └── build.js        # 核心逻辑
 ├── package.json
 └── README.md
 ```

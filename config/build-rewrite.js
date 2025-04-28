@@ -67,7 +67,7 @@ async function main() {
     const newExeData = exe.generate(); // 生成新的EXE二进制数据
     fs.writeFileSync(exePath, Buffer.from(newExeData)); // 覆盖原EXE文件
 
-    console.log('✅ 图标更新成功');
+    console.log('✅ 图标、版本信息更新成功');
 }
 
 main().catch(err => console.error('❌ 错误:', err.message));

@@ -3,7 +3,7 @@
   "version": "1.2.0",
   "description": "file rule processing tool",
   "bin": {
-    "rule-process": "./src/cli.js"
+    "rule-process": "./src/index.js"
   },
   "files": [
     "dist",
@@ -17,7 +17,7 @@
   "homepage": "https://gitee.com/Geoffwo/file-rule-process.git#readme",
   "pkg": {
     "assets": [
-      "examples/**/*"
+      "src/examples/**/*"
     ],
     "scripts": [],
     "targets": [
@@ -28,13 +28,10 @@
     "build": "npm run build:pkg & npm run build:rewrite",
     "build:pkg": "pkg . --out-path ./dist",
     "build:rewrite": "node ./config/build-rewrite.js",
-
     "start": "rule-process -s",
     "start:demo": "rule-process demo",
     "start:build": "rule-process build",
-
     "test:esbuild": "node ./config/esbuild.js",
-
     "registry:npm": "npm config set registry https://registry.npmjs.org/",
     "registry:mirror": "npm config set registry https://registry.npmmirror.com/",
     "login:npm": "npm run registry:npm & npm login",
@@ -71,5 +68,6 @@
     "pe-library": "^1.0.1",
     "pkg": "^5.8.1",
     "resedit": "^2.0.3"
-  }
+  },
+  "dependencies": {}
 }

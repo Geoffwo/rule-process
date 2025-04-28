@@ -56,8 +56,8 @@ npm run start:example
 │   └── ruleDir/       # Rule files
 │       └── rule.js    
 ├── src/               # Source code
-│   ├── cli.js         # CLI interface
-│   └── core.js        # Core logic
+│   ├── index.js         # CLI interface
+│   └── build.js        # Core logic
 ├── package.json
 └── README.md
 ```
