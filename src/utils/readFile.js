@@ -1,12 +1,15 @@
 // utils/fileReader.js
 const fs = require("fs-extra");
 const {logStep} = require("./log");
+let maxSize = 2 //mb
+let encode = null
 const encodeObject = {
     // 二进制格式文件
-    binary: [
+    buffer: [
         'png', 'jpg', 'jpeg', 'gif',
         'bmp', 'ico', 'webp', 'tiff',
-        'zip', 'rar', 'exe', 'dll'
+        'zip', 'rar', 'exe', 'dll',
+        'xlsx','xls'
     ],
 
     // UTF-8 文本格式
@@ -25,7 +28,7 @@ const encodeObject = {
 const encodeMap = new Map();
 
 // 初始化缓存 构建:扩展名 => 编码
-(function initEncodingCache() {
+(()=>{
     Object.entries(encodeObject).forEach(([encoding, exts]) => {
         exts.forEach(ext => {
             encodeMap.set(ext.toLowerCase(), encoding);
@@ -36,32 +39,56 @@ const encodeMap = new Map();
 /**
  * 根据扩展名获取编码类型
  * @param {string} ext - 文件扩展名（带或不带点）
- * @returns {string} 编码类型
+ * @returns {{encode: (any|string), normExt: string}} 编码类型
  */
-function getEncodingByExt(ext) {
-    // 标准化扩展名（不带点转小写）
-    const normalizedExt = ext.replace(/^\./, '').toLowerCase();
-    const encode = encodeMap.get(normalizedExt)
-    if(!encode){
-        logStep( `未定义${normalizedExt}，使用默认utf-8解析`);
-        return 'utf-8'
+function getEncodeByExt(ext) {
+    if (!ext) {
+        return {
+            normExt: '未知',
+            encode:'utf-8'
+        }
     }
 
-    logStep( `${normalizedExt}自动适配${encode}解析`);
-    return encode;
+    // 标准化扩展名（不带点转小写）
+    const normExt = ext.replace(/^\./, '').toLowerCase();
+    const encode = encodeMap.get(normExt) || 'utf-8'
+    return {normExt,encode}
 }
 
+function getRealEncodeByExt(node) {
+    logStep(`[${node.normExt}]编码类型使用[${node.encode}]解析`);
+    return node.encode === 'buffer' ? null : encode
+}
+
+function setSize(size){
+    logStep( `用户强制更改读取文件大小安全限制为:${size}MB`);
+    maxSize=size
+}
+
+function setEncodeInput(code){
+    logStep( `用户强制更改读取文件大小安全限制为:${code}MB`);
+    encode=code
+}
 
 function readFileWithLimit(inputNode) {
-    const MAX_SIZE = 1024 * 1024 * 2; // 2MB
+    //限制文件安全大小
+    const fileMaxSize = 1024 * 1024 * maxSize; // 2MB
     const stats = fs.statSync(inputNode.path);
-    if (stats.size > MAX_SIZE) {
-        throw new Error(`文件过大: ${inputNode.path}`);
+
+    if (stats.size > fileMaxSize) {
+        throw new Error(`文件过大: 最大允许${maxSize}MB,使用-s指令修改`);
     }
-    return fs.readFileSync(inputNode.path, getEncodingByExt(inputNode.ext));
+
+    if(encode){
+        logStep( `强制指定输入文件编码为: ${encode}`);
+    }
+
+    const finalEncode = encode || getRealEncodeByExt(inputNode);
+    return fs.readFileSync(inputNode.path, finalEncode);
 }
 
 module.exports = {
-    readFileWithLimit
+    readFileWithLimit,
+    getEncodeByExt
 };
 

@@ -6,8 +6,7 @@ const {generateBasic} = require('./build');
 const baseConfig = {
     input: path.join(process.cwd(), './examples/inputDir'),    // 默认输入目录
     output: path.join(process.cwd(), './examples/outputDir'), // 默认输出文件
-    rule: path.join(process.cwd(), './examples/ruleDir/rule.js'), // 默认规则文件
-    silent: false, // 从选项获取静默标志
+    rule: path.join(process.cwd(), './examples/ruleDir/rule.js') // 默认规则文件
 }
 
 /**
@@ -19,14 +18,19 @@ function build(options={}){
         input=baseConfig.input,
         output=baseConfig.output,
         rule=baseConfig.rule,
-        silent = baseConfig.silent, // 从选项获取静默标志
+        close, // 从选项获取静默标志
         encodeInput,
         encodeOutput,
     }=options
 
     // 控制日志显示
-    setEnableLog(!silent) // 如果 silent 为 true 则关闭日志
+    setEnableLog(!close) // 如果 close 为 true 则关闭日志
 
+    //控制读取文件大小
+
+    //控制读取文件编码方式
+
+    //自动读取规则 核心
     generateBasic(input, output, rule)
 }
 
@@ -83,6 +87,25 @@ async function copyVirtualDir(source, target) {
         } else {
             const content = await fs.readFile(sourcePath);
             await fs.outputFile(targetPath, content);
+        }
+    }
+}
+
+//检测宿主环境项目的node_modules
+function detectHostModule(moduleName) {
+    // 方案1: 优先检测宿主环境项目的node_modules
+    const hostNodeModules = path.join(process.cwd(), 'node_modules');
+    const hostModulePath = path.join(hostNodeModules, moduleName);
+    if (fs.existsSync(hostModulePath)) {
+        return require(hostModulePath);
+    }
+
+    // 方案2: 检测全局安装的模块（可选）
+    const globalPaths = require('module').globalPaths;
+    for (const globalPath of globalPaths) {
+        const globalModulePath = path.join(globalPath, moduleName);
+        if (fs.existsSync(globalModulePath)) {
+            return require(globalModulePath);
         }
     }
 }

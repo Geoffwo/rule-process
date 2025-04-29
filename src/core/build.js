@@ -2,10 +2,10 @@ const fs = require('fs-extra');
 const path = require('path');
 const {logStep,logStepInfo} = require('../utils/log');
 const {validateLoadRuleFun, validateOutputNode, validatePaths} = require('../utils/validator');
-const {readFileWithLimit} = require('../utils/readFile');
+const {readFileWithLimit,getEncodeByExt} = require('../utils/readFile');
 
 /**
- * 生成ECharts配置模块文件
+ * 自动读取规则
  * @param {string} inputPath - 输入路径（文件或目录）
  * @param {string} outputPath - 输出路径（文件或目录）
  * @param {string} rulesPath - 模板规则文件路径
@@ -61,10 +61,12 @@ function getInputArray(inputPath) {
 
 function loadInputNode(inputPath,isDirectory = false) {
     //path.parse(inputPath): root、dir、base、ext、name
+    const parsedPath = path.parse(inputPath);
     const baseInputNode = {
-        ...path.parse(inputPath),
+        ...parsedPath,
+        ...getEncodeByExt(parsedPath.ext),//编码方式 和 标准化扩展名 normExt,encode
         path: inputPath,
-        isDirectory
+        isDirectory,
     }
     return {
         ...baseInputNode,

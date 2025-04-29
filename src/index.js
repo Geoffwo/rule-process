@@ -27,7 +27,8 @@ program
     .option('-i, --input <path>', '输入路径', baseConfig.input)
     .option('-o, --output <path>', '输出路径', baseConfig.output)
     .option('-r, --rule <path>', '规则文件', baseConfig.rule)
-    .option('-s, --silent', '关闭所有日志输出')
+    .option('-c, --close', '关闭所有日志输出')
+    .option('-s, --size', '强制更改读取文件大小安全限制')
     .option('-ci, --encode-input <encoding>', '强制指定输入文件编码')
     .option('-co, --encode-output <encoding>', '强制指定输出文件编码')
     .action(async (cmdOptions) => {
