@@ -36,6 +36,8 @@ function validateOutputNode(node) {
 
 function validateLoadRuleFun(rulesPath) {
     logStep( '加载模板规则地址:',rulesPath);
+
+    // 加载 rule 文件，此时 rule 文件 require('xlsx') 会走上面的逻辑
     const ruleFuc = require(rulesPath);
 
     // 检查是否导出函数

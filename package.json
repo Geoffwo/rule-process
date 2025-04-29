@@ -68,6 +68,5 @@
     "pe-library": "^1.0.1",
     "pkg": "^5.8.1",
     "resedit": "^2.0.3"
-  },
-  "dependencies": {}
+  }
 }

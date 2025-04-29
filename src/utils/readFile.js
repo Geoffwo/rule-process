@@ -57,7 +57,7 @@ function getEncodeByExt(ext) {
 
 function getRealEncodeByExt(node) {
     logStep(`[${node.normExt}]编码类型使用[${node.encode}]解析`);
-    return node.encode === 'buffer' ? null : encode
+    return node.encode === 'buffer' ? null : node.encode
 }
 
 function setSize(size){
