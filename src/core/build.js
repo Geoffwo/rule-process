@@ -3,6 +3,7 @@ const path = require('path');
 const {logStep,logStepInfo} = require('../utils/log');
 const {validateLoadRuleFun, validateOutputNode, validatePaths} = require('../utils/validator');
 const {readFileWithLimit,getEncodeByExt} = require('../utils/readFile');
+const { detectHostModule } = require('./hosting');
 
 /**
  * 自动读取规则
@@ -21,9 +22,9 @@ function generateBasic(inputPath, outputPath, rulesPath) {
         const inputArray = getInputArray(inputPath);
         logStep('获取输入文件列表结束','\n');
 
-        logStep('模板方法校验开始');
-        const ruleFun = validateLoadRuleFun(rulesPath);
-        logStep('模板方法校验结束','\n');
+        logStep('模板导入开始');
+        const ruleFun = loadRuleFun(rulesPath);
+        logStep('模板导入结束','\n');
 
         logStep('生成带目录结构的输出内容开始');
         const outputArray = buildOutputArray(inputArray, ruleFun, outputPath);
@@ -99,6 +100,40 @@ function traverseDirectory(dirPath) {
     }
 
     return results;
+}
+
+//处理导入模板逻辑 require劫持
+function loadRuleFun(rulesPath){
+    // 临时重写 Node.js 的 require 方法，实现依赖劫持
+    const Module = require('module');
+    const originalRequire = Module.prototype.require;
+
+    // 增加递归保护标志
+    // let inDetectHostModule = false;
+    Module.prototype.require = function(moduleName) {
+        try {
+            // 先尝试用原始 require（即 exe 内部依赖）
+            return originalRequire.apply(this, arguments);
+        } catch (e) {
+            // 如果找不到模块（只处理 MODULE_NOT_FOUND 错误），则尝试用宿主环境依赖
+            if (e.code === 'MODULE_NOT_FOUND') {
+                // 传递原生 require，避免递归
+                return detectHostModule(moduleName, originalRequire);
+            }
+            // 其它错误继续抛出
+            throw e;
+        }
+    };
+    logStep( 'require模块劫持，使用宿主环境依赖');
+
+    // 加载 rule 文件，此时 rule 文件 require('xlsx') 会走上面的逻辑
+    const ruleFun = validateLoadRuleFun(rulesPath);
+
+    // 恢复原始 require 方法，避免影响后续模块加载
+    Module.prototype.require = originalRequire;
+    logStep( 'require模块恢复，使用软件本身依赖');
+
+    return ruleFun
 }
 
 function buildOutputArray(inputArray, ruleFuc, outputPath) {
