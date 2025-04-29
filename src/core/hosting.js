@@ -75,7 +75,6 @@ function detectHostModule(moduleName, nativeRequire) {
     } catch (err) {
         // 捕获异常并给出友好提示
         throw new Error(`模块 "${moduleName}" 加载失败，请确保已在【项目根目录/全局】安装该模块（如：npm install ${moduleName} -g）。\n原始错误信息：${err.message}`);
-        throw new Error(`模块 "${moduleName}" 加载失败，请确保已在【项目根目录/全局】安装该模块（如：npm install ${moduleName}）。\n原始错误信息：${err.message}`);
     }
 }
 
