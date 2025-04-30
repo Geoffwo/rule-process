@@ -1,5 +1,6 @@
 const fs = require('fs-extra');
 const path = require('path');
+const { spawnSync } = require('child_process');
 const {logStep} = require('../utils/log');
 
 
@@ -51,12 +52,25 @@ async function copyVirtualDir(source, target) {
 
 //检测宿主环境项目的node_modules
 function detectHostModule(moduleName, nativeRequire) {
+    // 尝试加载模块的函数
+    const tryLoadModule = (modulePath) => {
+        try {
+            return nativeRequire.call(module, modulePath);
+        } catch (err) {
+            return null;
+        }
+    };
+
+    // 1. 先尝试常规加载（可能已存在的模块）
+    const moduleInto = tryLoadModule();
+    if (moduleInto) return moduleInto;
+
     // 方案1: 优先检测宿主环境项目的node_modules
     const hostNodeModules = path.join(process.cwd(), 'node_modules');
     const hostModulePath = path.join(hostNodeModules, moduleName);
     if (fs.existsSync(hostModulePath)) {
-        logStep('加载宿主环境当前项目的node_modules')
-        return nativeRequire.call(module, hostModulePath);
+        logStep(`检测到本地存在[${moduleName}]模块，正在加载...`)
+        return tryLoadModule(hostModulePath);
     }
 
     // 方案2: 检测全局安装的模块（可选）
@@ -64,17 +78,39 @@ function detectHostModule(moduleName, nativeRequire) {
     for (const globalPath of globalPaths) {
         const globalModulePath = path.join(globalPath, moduleName);
         if (fs.existsSync(globalModulePath)) {
-            logStep('加载宿主环境的全局安装模块')
-            return nativeRequire.call(module, globalModulePath);
+            logStep(`检测到全局存在[${moduleName}]模块，正在加载...`)
+            return tryLoadModule(globalModulePath);
         }
     }
 
-    // 默认
     try {
-        return nativeRequire.call(module, moduleName);
+        // 优先尝试本地安装
+        logStep(`未检测到[${moduleName}]模块,正在尝试本地安装...`);
+        const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';//Windows 可能需要调用 npm.cmd
+        const result = spawnSync(npmCmd, ['install', moduleName], {
+            cwd: process.cwd(),
+            stdio: 'inherit'
+        });
+
+        if (result.status !== 0) {
+            throw new Error('安装失败，请检查网络或权限');
+        }
+
+        // 安装后直接尝试加载宿主项目模块 hostModulePath
+        if (!fs.existsSync(hostModulePath)) {
+            throw new Error(`安装成功，但模块未找到于路径: ${hostModulePath}`);
+        }
+
+        // 重新加载模块
+        const installedModule = tryLoadModule(hostModulePath);
+        if (installedModule) {
+            logStep(`检测到本地存在[${moduleName}]模块，正在加载...`)
+            return installedModule;
+        } else {
+            throw new Error('安装成功，但加载模块失败，请检查模块兼容性');
+        }
     } catch (err) {
-        // 捕获异常并给出友好提示
-        throw new Error(`模块 "${moduleName}" 加载失败，请确保已在【项目根目录/全局】安装该模块（如：npm install ${moduleName} -g）。\n原始错误信息：${err.message}`);
+        throw new Error(`无法自动安装模块,请尝试手动安装:npm install ${moduleName} -g\n原始错误信息: ${err.message}`);
     }
 }
 
