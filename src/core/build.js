@@ -157,9 +157,13 @@ function getOutputNodeTemplate(outputPath) {
         path: outputPath,//导出路径
         isDirectory: false,//是否是目录，布尔值 true/false
         content: '',//内容
-        append: false, // 是否追加，布尔值 true/false
-        ext:'js',//【可选】导出文件类型
         fileName:'result',
+        ext:'js',//【可选】导出文件类型
+        option:{
+            encode:'utf8',//文件编码格式（'utf8'、'base64'、'hex'，写入 Buffer 时设为 null）
+            mode: 0o666,//文件权限（八进制数，如 0o666 表示可读写）
+            flag: 'w',//文件操作模式（'w' 覆盖写、'a' 追加、'wx' 排他写等）
+        }
     }
 }
 
@@ -195,7 +199,7 @@ function processOutputArray(outputArray) {
             ensureOutputDirectory(parentDir)
 
             // 写入文件内容（根据规则覆盖或追加）
-            writeFileContent(fullPath, node.content, node.append);
+            writeFileContent(fullPath, node.content, node.option);
             logStep('创建文件: ',fullPath)
         }
     });
