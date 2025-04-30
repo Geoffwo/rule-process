@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const { program } = require('commander')
 const ruleProcess = require('./core/setup')
+const baseConfig =  ruleProcess.baseConfig // 基础配置
 
 // 双击窗口显示帮助 isTTY是false
 if (process.argv.length === 2) {
@@ -12,18 +13,18 @@ if (process.argv.length === 2) {
     return;
 }
 
-// 基础配置
-const baseConfig =  ruleProcess.baseConfig
-
+// 全局配置
 program
-    .name('rule-process') // 设置帮助信息中的名称
-    .description('高级规则处理系统,建议全局安装')
-    .version(
-        '1.0.0',
-        '-v, --version', // 添加-v别名
-        '显示版本号'
-    )
-    // .argument('[input]', '输入路径', defaultConfig.input)
+    .name('rule-process')
+    .description('高级规则处理系统')
+    .version('1.0.0', '-v, --version','显示版本号')
+    .option('--verbose', '显示详细日志')
+    .configureHelp({ showGlobalOptions: true });
+
+// 主命令：run
+program
+    .command('run')
+    .description('执行规则处理（默认命令）')
     .option('-i, --input <path>', '输入路径', baseConfig.input)
     .option('-o, --output <path>', '输出路径', baseConfig.output)
     .option('-r, --rule <path>', '规则文件', baseConfig.rule)
@@ -31,14 +32,14 @@ program
     .option('-s, --size', '强制更改读取文件大小安全限制')
     .option('-ci, --encode-input <encoding>', '强制指定输入文件编码')
     .option('-co, --encode-output <encoding>', '强制指定输出文件编码')
-    .action(async (cmdOptions) => {
+    .action(async (options) => {
         try {
-            ruleProcess.build(cmdOptions) // 使用用户提供的参数
+            await ruleProcess.build(options);
         } catch (error) {
-            console.error('指令构建失败:', error.message)
-            process.exit(1)
+            console.error('执行失败:', error.message);
+            process.exit(1);
         }
-    })
+    });
 
 // 新增默认构建指令
 program
@@ -54,18 +55,12 @@ program
         }
     })
 
-// 新增默认构建指令
-program
-    .command('build') // 子命令名称
-    .description('使用演示案例目录结构快速运行，直接运行examples目录文件')
-    .addHelpText('after', '\n注释说明:\n  运行前请确保已通过demo命令生成示例文件') // 添加子命令注释
-    .action(() => {
-        try {
-            ruleProcess.build() // 直接使用 宿主机文件  baseConfig 默认值
-        } catch (error) {
-            console.error('默认构建失败:', error.message)
-            process.exit(1)
-        }
-    })
+// 统一错误处理
+program.exitOverride(err => {
+    if (err.code === 'commander.unknownCommand') {
+        console.error('未知命令: %s\n 使用 -h 查看帮助', err.message);
+    }
+    process.exit(1);
+});
 
 program.parse(process.argv)
