@@ -162,7 +162,8 @@ function processOutputArray(outputArray) {
 
             // 判断 option 的encode字段是否存在
             // 如果为空，表示用户没有设置，使用自动匹配，如果不为空，使用用户设置的编码方式
-            mergedOption.encode = mergedOption.encode ? mergedOption.encode : getRealEncodeByNode(mergedNode.normExt);
+            const encodeNode = getEncodeByExt(mergedNode.normExt);
+            mergedOption.encode = mergedOption.encode ? mergedOption.encode : getRealEncodeByNode(encodeNode);
 
             const finalNode = Object.assign({}, mergedNode, { option: mergedOption });//合并最终的node
 
