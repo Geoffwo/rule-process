@@ -31,7 +31,6 @@ program
     .option('-c, --close', '关闭所有日志输出')
     .option('-s, --size', '强制更改读取文件大小安全限制')
     .option('-ci, --encode-input <encoding>', '强制指定输入文件编码')
-    .option('-co, --encode-output <encoding>', '强制指定输出文件编码')
     .action(async (options) => {
         try {
             await ruleProcess.build(options);

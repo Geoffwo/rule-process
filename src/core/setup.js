@@ -3,6 +3,7 @@ const path = require('path');
 const {setEnableLog,logStep} = require('../utils/log');
 const {generateBasic} = require('./build');
 const {createHostExamples} = require('./hosting');
+const {setSize,setEncodeInput} = require('../utils/readFile');
 
 const baseConfig = {
     input: path.join(process.cwd(), './examples/inputDir'),    // 默认输入目录
@@ -20,16 +21,18 @@ function build(options={}){
         output=baseConfig.output,
         rule=baseConfig.rule,
         close, // 从选项获取静默标志
-        encodeInput,
-        encodeOutput,
+        size,
+        encodeInput
     }=options
 
     // 控制日志显示
     setEnableLog(!close) // 如果 close 为 true 则关闭日志
 
-    //控制读取文件大小
+    // 控制读取文件大小
+    size > 0 && setSize(size);
 
-    //控制读取文件编码方式
+    // 控制读取文件编码方式
+    encodeInput && setEncodeInput(encodeInput);
 
     //自动读取规则 核心
     generateBasic(input, output, rule)

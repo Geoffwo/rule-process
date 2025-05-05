@@ -19,10 +19,11 @@ function validatePaths(...paths) {
 function validateOutputNode(node) {
     // 首先检查node是否为对象
     if (typeof node !== 'object' || node === null || Array.isArray(node)) {
+        logStep( 'node节点返回格式不正确');
         return false;
     }
 
-    const requiredFields = ['path', 'isDirectory', 'content', 'append'];
+    const requiredFields = ['path', 'isDirectory', 'content', 'option'];
 
     // 检查必需字段是否存在
     for (const field of requiredFields) {
@@ -46,6 +47,48 @@ function validateLoadRuleFun(rulesPath) {
     }
 
     return ruleFuc;
+}
+
+
+/**
+ * 校验数组中每个对象的 path 字段是否有效
+ * @param {Array} arr
+ */
+function validateOutputNode(arr) {
+    if (!Array.isArray(arr))  throw new Error('输入必须为数组');
+
+    validateArrayPathEmpty(arr);
+    validateArrayPathIsOnlyDir(arr);
+
+
+}
+
+/**
+ * 校验数组中是否存在 path 字段为空的对象
+ * @param {Array} arr
+ */
+function validateArrayPathEmpty(arr) {
+    const hasEmptyPath = arr.some(item => typeof item.path !== 'string' || !item.path.trim());
+    if (hasEmptyPath) {
+        throw new Error('数组中存在 path 字段为空的对象');
+    }
+}
+
+/**
+ * 校验数组中是否存在 path 字段不是仅为目录的对象
+ * @param {Array} arr
+ */
+function validateArrayPathIsOnlyDir(arr) {
+    const hasNotOnlyDir = arr.every(item => {
+        const pathValue = item.path.trim();
+        // 最后一段不能包含点号或以斜杠结尾
+        const lastSegment = pathValue.split(/[/\\]/).filter(Boolean).pop();
+        if (!lastSegment || lastSegment.includes('.')) return false;
+        return true;
+    });
+    if (!hasNotOnlyDir) {
+        throw new Error('数组中存在 path 字段[以斜杠结尾或包含文件名]的对象');
+    }
 }
 
 module.exports = {
