@@ -1,4 +1,3 @@
-const fs = require('fs-extra');
 const path = require('path');
 const {setEnableLog,logStep} = require('../utils/log');
 const {generateBasic} = require('./build');
@@ -42,11 +41,11 @@ function build(options={}){
  * 用户快速示例
  * @returns {Promise<void>}
  */
-async function demo(options={}) {
+async function demo() {
     // 1. 在宿主机创建示例文件
     await createHostExamples();
 
-    build(options) // 直接使用 baseConfig 默认值
+    build() // 直接使用 baseConfig 默认值
 }
 
 module.exports = {

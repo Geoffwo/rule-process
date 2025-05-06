@@ -1,6 +1,8 @@
 #!/usr/bin/env node
+const path = require("path");
 const { program } = require('commander')
 const ruleProcess = require('./core/setup')
+
 const baseConfig =  ruleProcess.baseConfig // 基础配置
 
 // 双击窗口显示帮助 isTTY是false
@@ -31,9 +33,16 @@ program
     .option('-c, --close', '关闭所有日志输出')
     .option('-s, --size', '强制更改读取文件大小安全限制')
     .option('-ci, --encode-input <encoding>', '强制指定输入文件编码')
+    .option('--js-config <path>', '解析JS配置文件')
     .action(async (options) => {
         try {
-            await ruleProcess.build(options);
+            const jsConfig = options.jsConfig && require(path.join(process.cwd(), options.jsConfig));
+            const finalConfig = {
+                ...jsConfig,  // JS配置
+                ...options // 命令行选项（最高优先级）
+            };
+
+            await ruleProcess.build(finalConfig);
         } catch (error) {
             console.error('执行失败:', error.message);
             process.exit(1);
