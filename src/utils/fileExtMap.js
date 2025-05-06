@@ -10,7 +10,7 @@ const encodeObject = {
     ],
 
     // UTF-8 文本格式
-    utf8: [
+    'utf-8': [
         'txt', 'js', 'json', 'html',
         'css', 'csv', 'md', 'xml',
         'yaml', 'yml', 'log', 'ini',
