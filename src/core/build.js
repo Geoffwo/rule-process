@@ -114,8 +114,7 @@ function loadRuleFun(rulesPath){
     const Module = require('module');
     const originalRequire = Module.prototype.require;
 
-    // 增加递归保护标志
-    // let inDetectHostModule = false;
+    logStep( 'require模块劫持，使用宿主环境依赖');
     Module.prototype.require = function(moduleName) {
         try {
             // 先尝试用原始 require（即 exe 内部依赖）
@@ -130,7 +129,6 @@ function loadRuleFun(rulesPath){
             throw e;
         }
     };
-    logStep( 'require模块劫持，使用宿主环境依赖');
 
     // 加载 rule 文件，此时 rule 文件 require('xlsx') 会走上面的逻辑
     const ruleFun = validateLoadRuleFun(rulesPath);
