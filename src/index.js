@@ -2,6 +2,7 @@
 const path = require("path");
 const { program } = require('commander')
 const ruleProcess = require('./core/setup')
+const {preprocessDependencies} = require('./core/preprocess')
 
 const baseConfig =  ruleProcess.baseConfig // 基础配置
 
@@ -43,6 +44,27 @@ program
             };
 
             await ruleProcess.build(finalConfig);
+        } catch (error) {
+            console.error('执行失败:', error.message);
+            process.exit(1);
+        }
+    });
+
+program
+    .command('init') // 子命令名称
+    .description('添加依赖模块')
+    .option('-r, --rule <path>', '规则文件', baseConfig.rule)
+    .option('--js-config <path>', '解析JS配置文件')
+    .action(async (options) => {
+        try {
+            const jsConfig = options.jsConfig && require(path.join(process.cwd(), options.jsConfig));
+            const finalConfig = {
+                ...jsConfig,  // JS配置
+                ...options // 命令行选项（最高优先级）
+            };
+
+            // 使用示例
+            await preprocessDependencies(finalConfig.rule);
         } catch (error) {
             console.error('执行失败:', error.message);
             process.exit(1);

@@ -5,7 +5,6 @@ const {validateLoadRuleFun, validateOutputNode, validatePaths} = require('../uti
 const {readFileWithLimit} = require('../utils/readFile');
 const {getEncodeByExt,getRealEncodeByNode} = require('../utils/fileExtMap');
 const {getOutputNodeDoc,getOutputNodeTemplate} = require('../utils/writerFile');
-const { detectHostModule } = require('./hosting');
 
 /**
  * 自动读取规则
@@ -27,6 +26,10 @@ function generateBasic(inputPath, outputPath, rulesPath) {
         logStep('模板导入开始');
         const ruleFun = loadRuleFun(rulesPath);
         logStep('模板导入结束','\n');
+
+        logStep('校验模板开始');
+        validateLoadRuleFun(ruleFun);
+        logStep('校验模板结束','\n');
 
         logStep('生成输出结构开始');
         const outputArray = buildOutputArray(inputArray, ruleFun, outputPath);
@@ -110,34 +113,19 @@ function traverseDirectory(dirPath) {
 
 //处理导入模板逻辑 require劫持
 function loadRuleFun(rulesPath){
-    // 临时重写 Node.js 的 require 方法，实现依赖劫持
-    const Module = require('module');
-    const originalRequire = Module.prototype.require;
+    logStep( '加载模板规则地址:',rulesPath);
 
-    logStep( 'require模块劫持，使用宿主环境依赖');
-    Module.prototype.require = function(moduleName) {
-        try {
-            // 先尝试用原始 require（即 exe 内部依赖）
-            return originalRequire.apply(this, arguments);
-        } catch (e) {
-            // 如果找不到模块（只处理 MODULE_NOT_FOUND 错误），则尝试用宿主环境依赖
-            if (e.code === 'MODULE_NOT_FOUND') {
-                // 传递原生 require，避免递归
-                return detectHostModule(moduleName, originalRequire);
-            }
-            // 其它错误继续抛出
-            throw e;
+    try{
+        return require(rulesPath)
+    }catch (e){
+        // 如果找不到模块（只处理 MODULE_NOT_FOUND 错误），则尝试用宿主环境依赖
+        if (e.code === 'MODULE_NOT_FOUND') {
+            logStep('模块依赖缺失,请执行rule-process init添加依赖');
+            process.exit(1);
         }
-    };
-
-    // 加载 rule 文件，此时 rule 文件 require('xlsx') 会走上面的逻辑
-    const ruleFun = validateLoadRuleFun(rulesPath);
-
-    // 恢复原始 require 方法，避免影响后续模块加载
-    Module.prototype.require = originalRequire;
-    logStep( 'require模块恢复，使用软件本身依赖');
-
-    return ruleFun
+        // 其它错误继续抛出
+        throw e;
+    }
 }
 
 function buildOutputArray(inputArray, ruleFuc, outputPath) {
