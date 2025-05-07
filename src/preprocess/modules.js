@@ -2,15 +2,15 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { logStep } = require('../utils/log');
-const { detectHostModule } = require('./hosting');
+const { detectHostModule } = require('../core/hosting');
 
 // 主函数：预处理依赖
-function preprocessDependencies(rulesPath) {
+function preprocessModules(rulesPath) {
     let installList = []; // 在函数顶部声明，初始化为空数组
     try {
         // 1. 读取规则文件内容
         const fileContent = fs.readFileSync(rulesPath, 'utf-8');
-        logStep('规则文件读取成功');
+        logStep('读取:',rulesPath);
 
         // 2. 提取所有 require 的模块名
         const dependencies = extractRequiredModules(fileContent);
@@ -19,7 +19,7 @@ function preprocessDependencies(rulesPath) {
         // 3. 过滤需要安装的第三方模块
         installList = filterInstallableModules(dependencies);
         if (installList.length === 0) {
-            logStep('无缺失依赖，跳过安装');
+            logStep('无缺失依赖，跳过安装\n');
             return;
         }
 
@@ -29,7 +29,7 @@ function preprocessDependencies(rulesPath) {
 
         // 5. 验证安装结果
         validateInstallation(installList);
-        logStep('预处理成功，所有依赖已就绪');
+        logStep('预处理成功，所有依赖已就绪\n');
     } catch (error) {
         logStep('预处理失败，请尝试手动安装:npm install -g ', installList.join(' '));
         process.exit(1);
@@ -89,5 +89,5 @@ function validateInstallation(modules) {
 }
 
 module.exports = {
-    preprocessDependencies
+    preprocessModules
 };

@@ -1,6 +1,5 @@
 const fs = require('fs-extra');
 const path = require('path');
-const { spawnSync,spawn } = require('child_process');
 const {logStep} = require('../utils/log');
 
 
@@ -71,7 +70,34 @@ function detectHostModule(moduleName) {
         }
     }
 }
+
+//检测宿主环境项目的插件
+function detectHostPlugin() {
+    // 检测宿主环境项目的插件目录
+    const hostPlugins = path.join(process.cwd(), 'plugin');
+    const plugins = []
+
+    if (!fs.existsSync(hostPlugins)) {
+        logStep(`本地未安装插件`)
+        return plugins;
+    }
+
+    const files = fs.readdirSync(hostPlugins);
+    for (const file of files) {
+        if (!file.endsWith('.js')) continue;
+
+        const filePath = path.join(hostPlugins, file);
+        try {
+            plugins.push(filePath);
+        } catch (error) {
+            logStep(`插件 ${file} 加载失败:`, error.message);
+        }
+    }
+
+    return plugins;
+}
 module.exports = {
     createHostExamples,
-    detectHostModule
+    detectHostModule,
+    detectHostPlugin
 };
