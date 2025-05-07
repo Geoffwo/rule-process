@@ -176,10 +176,8 @@ function processOutputArray(outputArray) {
             }
         });
     } catch (err) {
-        logStep(`处理输出节点异常: ${err.message}`);
+        new Error(`处理输出节点异常: ${err.message}`);
     }
-
-
 }
 
 function ensureOutputDirectory(outputPath) {

@@ -28,7 +28,7 @@ function validateOutputNode(arr) {
 
     validateArrayPathEmpty(arr);
     validateArrayPathIsOnlyDir(arr);
-
+    validateArrayContent(arr)
 
 }
 
@@ -57,6 +57,34 @@ function validateArrayPathIsOnlyDir(arr) {
     });
     if (!hasNotOnlyDir) {
         throw new Error('数组中存在 path 字段[以斜杠结尾或包含文件名]的对象');
+    }
+}
+
+/**
+ * 校验数组中节点的 content 字段
+ * @param {Array} arr - 输出节点数组
+ */
+function validateArrayContent(arr) {
+    for (const node of arr) {
+        // 跳过目录节点（不需要 content）
+        if (node.isDirectory) {
+            continue;
+        }
+
+        // 检查 content 是否存在
+        if (node.content === undefined || node.content === null) {
+            throw new Error(`文件节点必须包含 content 字段: ${node.path}`);
+        }
+
+        // 校验 content 类型
+        const isContentValid = Buffer.isBuffer(node.content) || typeof node.content === 'string';
+        if (!isContentValid) {
+            throw new Error(
+                `文件内容类型错误: ${node.path}\n` +
+                `期望类型: Buffer 或 string\n` +
+                `实际类型: ${typeof node.content}`
+            );
+        }
     }
 }
 

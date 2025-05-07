@@ -3,6 +3,7 @@ const {setEnableLog,logStep} = require('../utils/log');
 const {generateBasic} = require('./build');
 const {createHostExamples} = require('./hosting');
 const {setSize,setEncodeInput} = require('../utils/readFile');
+const {preprocessDependencies} = require('./preprocess')
 
 const baseConfig = {
     input: path.join(process.cwd(), './examples/inputDir'),    // 默认输入目录
@@ -32,6 +33,9 @@ function build(options={}){
 
     // 控制读取文件编码方式
     encodeInput && setEncodeInput(encodeInput);
+
+    //预处理依赖
+    preprocessDependencies(rule)
 
     //自动读取规则 核心
     generateBasic(input, output, rule)
