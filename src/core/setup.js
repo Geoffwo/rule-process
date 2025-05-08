@@ -1,10 +1,11 @@
 const path = require('path');
-const {setEnableLog,logStep} = require('../utils/log');
+const {setEnableLog} = require('../utils/log');
 const {generateBasic} = require('./build');
 const {createHostExamples} = require('./hosting');
 const {setSize,setEncodeInput} = require('../utils/readFile');
 const {preprocessModules} = require('../preprocess/modules')
 const {preprocessPlugins} = require('../preprocess/plugin')
+const {install} = require('./install');
 
 const baseConfig = {
     input: path.join(process.cwd(), './examples/inputDir'),    // 默认输入目录
@@ -56,8 +57,22 @@ async function demo() {
     build() // 直接使用 baseConfig 默认值
 }
 
+/**
+ * 用户下载插件
+ * @returns {Promise<void>}
+ */
+async function install() {
+    // 1. 在宿主机创建示例文件
+    await install();
+
+    //预处理自定义插件
+    preprocessPlugins()
+}
+
+
 module.exports = {
     baseConfig,
     build,
-    demo
+    demo,
+    install
 };
