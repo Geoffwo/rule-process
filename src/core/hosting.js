@@ -71,33 +71,34 @@ function detectHostModule(moduleName) {
     }
 }
 
-//检测宿主环境项目的插件
-function detectHostPlugin() {
+//检测宿主环境项目的插件（目录）
+function detectHostDir(dir) {
     // 检测宿主环境项目的插件目录
-    const hostPlugins = path.join(process.cwd(), 'plugin');
-    const plugins = []
+    const hostDir = path.join(process.cwd(), dir);
+    const filePaths = []
 
-    if (!fs.existsSync(hostPlugins)) {
-        logStep(`本地未安装插件`)
-        return plugins;
+    if (!fs.existsSync(hostDir)) {
+        return filePaths;
     }
 
-    const files = fs.readdirSync(hostPlugins);
+    const files = fs.readdirSync(hostDir);
     for (const file of files) {
         if (!file.endsWith('.js')) continue;
 
-        const filePath = path.join(hostPlugins, file);
+        const filePath = path.join(hostDir, file);
         try {
-            plugins.push(filePath);
+            filePaths.push(filePath);
         } catch (error) {
-            logStep(`插件 ${file} 加载失败:`, error.message);
+            throw new Error(` ${file} 加载失败:`, error.message);
         }
     }
 
-    return plugins;
+    return filePaths;
 }
+
+
 module.exports = {
     createHostExamples,
     detectHostModule,
-    detectHostPlugin
+    detectHostDir
 };

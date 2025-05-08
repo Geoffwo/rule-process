@@ -1,11 +1,11 @@
 const pluginSystem = require('../interface/plugin')
-const {detectHostPlugin} = require('../core/hosting');
+const {detectHostDir} = require('../core/hosting');
 const {preprocessModules} = require('./modules');
 
 // 主函数：预处理插件
 function preprocessPlugins() {
     //预处理自定义插件
-    const pluginArray = detectHostPlugin();
+    const pluginArray = detectHostDir('plugin');
     pluginArray.forEach(path=>{
         //预处理插件依赖的npm
         preprocessModules(path)

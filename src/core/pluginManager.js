@@ -27,7 +27,7 @@ function ensureDirectory(path) {
     }
 }
 
-async function install(pluginSpec,options) {
+async function installPlugin(pluginSpec, options) {
     // 解析插件名称和版本
     const [pluginName, versionSpec] = pluginSpec.split('@');
     const requireVersion = versionSpec || 'latest';
@@ -64,5 +64,5 @@ async function install(pluginSpec,options) {
 }
 
 module.exports = {
-    install
+    installPlugin
 };

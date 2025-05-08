@@ -11,7 +11,7 @@
 > Node.js >=14.18.0
 > 
 ```bash
-npm install rule-process
+npm pluginManager rule-process
 ```
 
 ## 3. 目录结构

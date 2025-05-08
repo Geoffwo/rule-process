@@ -5,7 +5,7 @@ const {createHostExamples} = require('./hosting');
 const {setSize,setEncodeInput} = require('../utils/readFile');
 const {preprocessModules} = require('../preprocess/modules')
 const {preprocessPlugins} = require('../preprocess/plugin')
-const {install} = require('./install');
+const {installPlugin} = require('./pluginManager');
 
 const baseConfig = {
     input: path.join(process.cwd(), './examples/inputDir'),    // 默认输入目录
@@ -63,7 +63,7 @@ async function demo() {
  */
 async function install() {
     // 1. 在宿主机创建示例文件
-    await install();
+    await installPlugin();
 
     //预处理自定义插件
     preprocessPlugins()
