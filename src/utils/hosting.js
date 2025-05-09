@@ -1,6 +1,6 @@
 const fs = require('fs-extra');
 const path = require('path');
-const {logInfo,logError} = require('./log');
+const {logInfo,logError, logDebug} = require('./log');
 
 
 // 新增函数：创建宿主机示例文件
@@ -12,8 +12,8 @@ async function createHostExamples() {
     const sourcePath = path.join(__dirname, '../examples');
 
     // 调试信息（可选）
-    logInfo('资源来源路径:', sourcePath);
-    logInfo('虚拟文件系统检查:', await fs.pathExists(sourcePath));
+    logDebug('资源来源路径:', sourcePath);
+    logDebug('虚拟文件系统检查:', await fs.pathExists(sourcePath));
 
     if (!(await fs.pathExists(sourcePath))) {
         logError(`资源路径不存在，请检查打包配置: ${sourcePath}`);
@@ -28,8 +28,7 @@ async function createHostExamples() {
         // await fs.copy(sourcePath , hostExampleDir, { overwrite: true });
         logInfo(`示例文件已创建到：${hostExampleDir}\n`);
     } catch (error) {
-        console.error('创建示例文件失败:', error.message);
-        process.exit(1);
+        logError('创建示例文件失败:', error.message);
     }
 }
 
@@ -56,7 +55,7 @@ function detectHostModule(moduleName) {
     const hostNodeModules = path.join(process.cwd(), 'node_modules');
     const hostModulePath = path.join(hostNodeModules, moduleName);
     if (fs.existsSync(hostModulePath)) {
-        logInfo(`检测到本地存在[${moduleName}]模块`)
+        logDebug(`检测到本地存在[${moduleName}]模块`)
         return true;
     }
 
@@ -65,7 +64,7 @@ function detectHostModule(moduleName) {
     for (const globalPath of globalPaths) {
         const globalModulePath = path.join(globalPath, moduleName);
         if (fs.existsSync(globalModulePath)) {
-            logInfo(`检测到全局存在[${moduleName}]模块`)
+            logDebug(`检测到全局存在[${moduleName}]模块`)
             return true;
         }
     }

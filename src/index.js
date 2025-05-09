@@ -4,6 +4,7 @@ require('./interface/plugin'); // 确保初始化最先执行 插件系统挂载
 const path = require("path");
 const { program } = require('commander')
 const ruleProcess = require('./core/setup')
+const {logError} = require('./utils/log')
 
 const baseConfig =  ruleProcess.baseConfig // 基础配置
 
@@ -46,8 +47,7 @@ program
 
             await ruleProcess.build(finalConfig);
         } catch (error) {
-            console.error('执行失败:', error.message);
-            process.exit(1);
+            logError('执行失败:', error.message);
         }
     });
 
@@ -60,8 +60,7 @@ program
         try {
             await ruleProcess.demo()
         } catch (error) {
-            console.error('默认构建失败:', error.message)
-            process.exit(1)
+           logError('默认构建失败:', error.message)
         }
     })
 
@@ -74,8 +73,7 @@ program
         try {
             await ruleProcess.install(plugins, options)
         } catch (error) {
-            console.error('安装失败:', error.message);
-            process.exit(1);
+           logError('安装失败:', error.message);
         }
     });
 
@@ -87,17 +85,15 @@ program
         try {
             ruleProcess.list()
         } catch (error) {
-            console.error('读取失败:', error.message);
-            process.exit(1);
+           logError('读取失败:', error.message);
         }
     });
 
 // 统一错误处理
 program.exitOverride(err => {
     if (err.code === 'commander.unknownCommand') {
-        console.error('未知命令: %s\n 使用 -h 查看帮助', err.message);
+        logError('未知命令\n使用 -h 查看帮助');
     }
-    process.exit(1);
 });
 
 program.parse(process.argv)

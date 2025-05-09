@@ -44,7 +44,7 @@ function logPlugins(plugins) {
     logInfo(`读取插件列表开始`);
 
     if (plugins.length === 0) {
-        logInfo('未找到任何插件');
+        logWarn('未找到任何插件');
     }
 
     let index = 1;

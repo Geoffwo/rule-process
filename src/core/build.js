@@ -1,6 +1,6 @@
-const fs = require('fs-extra');
+const fs = require('fs');
 const path = require('path');
-const {logInfo,logError} = require('../utils/log');
+const {logInfo,logError, logDebug} = require('../utils/log');
 const {validateLoadRuleFun, validateOutputNode, validatePaths} = require('../utils/validator');
 const {readFileWithLimit} = require('../utils/ruleRead');
 const {getEncNodeByExt,getRealEncodeByNode} = require('../utils/ruleExt2EncMap');
@@ -14,11 +14,10 @@ const {createHostDir} = require('../utils/hosting');
  * @param {string} rulesPath - 模板规则文件路径
  */
 function generateBasic(inputPath, outputPath, rulesPath) {
-
     try {
-        logInfo('校验所有路径地址开始');
+        logDebug('校验所有路径地址开始');
         validatePaths(inputPath, outputPath, rulesPath);
-        logInfo('校验所有路径地址结束','\n');
+        logDebug('校验所有路径地址结束','\n');
 
         logInfo('获取输入文件列表开始');
         const inputArray = getInputArray(inputPath);
@@ -28,17 +27,17 @@ function generateBasic(inputPath, outputPath, rulesPath) {
         const ruleFun = loadRuleFun(rulesPath);
         logInfo('模板导入结束','\n');
 
-        logInfo('校验模板开始');
+        logDebug('校验模板开始');
         validateLoadRuleFun(ruleFun);
-        logInfo('校验模板结束','\n');
+        logDebug('校验模板结束','\n');
 
         logInfo('生成输出结构开始');
         const outputArray = buildOutputArray(inputArray, ruleFun, outputPath);
         logInfo('生成输出结构结束','\n');
 
-        logInfo('校验输出结构开始');
+        logDebug('校验输出结构开始');
         validateOutputNode(outputArray);
-        logInfo('校验输出结构结束','\n');
+        logDebug('校验输出结构结束','\n');
 
         logInfo('处理所有输出节点开始');
         processOutputArray(outputArray);
@@ -95,7 +94,7 @@ function traverseDirectory(dirPath) {
 
     for (const entry of entries) {
         const fullPath = path.join(dirPath, entry.name);
-        logInfo( '读取目录内容:',fullPath);
+        logDebug( '读取目录内容:',fullPath);
 
         const isDirectory = entry.isDirectory();
         const inputNode = loadInputNode(fullPath,isDirectory);
@@ -121,11 +120,10 @@ function loadRuleFun(rulesPath){
     }catch (e){
         // 如果找不到模块（只处理 MODULE_NOT_FOUND 错误），则尝试用宿主环境依赖
         if (e.code === 'MODULE_NOT_FOUND') {
-            logInfo('模块依赖缺失,请执行rule-process init添加依赖');
-            process.exit(1);
+            logError('模块依赖缺失,请执行rule-process init添加依赖');
         }
         // 其它错误继续抛出
-        throw e;
+        logError(e);
     }
 }
 
@@ -138,7 +136,7 @@ function buildOutputArray(inputArray, ruleFuc, outputPath) {
 }
 
 function processOutputArray(outputArray) {
-    logInfo( '输出数组长度:',outputArray.length);
+    logDebug( '输出数组长度:',outputArray.length);
     try {
         outputArray.forEach(node => {
             // 获取模板默认值（传入当前 node.path 以便支持动态路径）
@@ -165,7 +163,7 @@ function processOutputArray(outputArray) {
                 logInfo('创建目录: ',fullPath)
             } else {
                 fullPath = path.join(fullPath, `${fileName}.${normExt}`); // 默认文件名
-                logInfo(`自动拼接文件路径为: ${fullPath}`)
+                logDebug(`自动拼接文件名: ${fileName}.${normExt}`)
 
                 // 确保父目录存在
                 const parentDir = path.dirname(fullPath);
@@ -177,7 +175,7 @@ function processOutputArray(outputArray) {
             }
         });
     } catch (err) {
-        new Error(`处理输出节点异常: ${err.message}`);
+        logError(`处理输出节点异常: ${err.message}`);
     }
 }
 

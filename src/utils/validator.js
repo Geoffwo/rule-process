@@ -2,11 +2,11 @@ const path = require("path");
 const fs = require("fs");
 const semver = require('semver');
 
-const {logInfo,logError} = require("./log");
+const {logInfo,logError, logDebug} = require("./log");
 
 function validatePaths(...paths) {
     paths.forEach(path => {
-        logInfo( '校验地址:',path);
+        logDebug( '校验地址:',path);
         if (typeof path !== 'string' || !path.trim()) {
             logError(`路径参数无效: ${path}`);
         }
@@ -56,8 +56,7 @@ function validateArrayPathIsOnlyDir(arr) {
         const pathValue = item.path.trim();
         // 最后一段不能包含点号或以斜杠结尾
         const lastSegment = pathValue.split(/[/\\]/).filter(Boolean).pop();
-        if (!lastSegment || lastSegment.includes('.')) return false;
-        return true;
+        return lastSegment && !lastSegment.includes('.');
     });
     if (!hasNotOnlyDir) {
         logError('数组中存在 path 字段[以斜杠结尾或包含文件名]的对象');

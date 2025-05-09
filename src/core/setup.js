@@ -3,7 +3,7 @@ const {setEnableLog} = require('../utils/log');
 const {generateBasic} = require('./build');
 const {createHostExamples} = require('../utils/hosting');
 const {setSize,setEncodeInput} = require('../utils/ruleRead');
-const {preInstallModules} = require('../preprocess/modules')
+const {preInstallRuleModules} = require('../preprocess/modules')
 const {installPlugins,loadPlugin,listPlugin} = require('./plugin');
 
 const baseConfig = {
@@ -39,7 +39,7 @@ function build(options={}){
     loadPlugin()
 
     //预处理依赖
-    preInstallModules(rule)
+    preInstallRuleModules(rule)
 
     //自动读取规则 核心
     generateBasic(input, output, rule)

@@ -1,5 +1,5 @@
 // utils/fileReader.js
-const {logInfo} = require("./log");
+const {logInfo, logVerbose} = require("./log");
 const encodeObject = {
     // 二进制格式文件
     buffer: [
@@ -54,7 +54,7 @@ function getEncNodeByExt(ext) {
 }
 
 function getRealEncodeByNode(node) {
-    logInfo(`[${node.normExt}]使用[${node.encode}]编码类型解析`);
+    logVerbose(`[${node.normExt}]使用[${node.encode}]编码类型解析`);
     return node.encode === 'buffer' ? null : node.encode
 }
 

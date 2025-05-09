@@ -1,20 +1,18 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { logInfo,logError } = require('../utils/log');
+const { logInfo,logError, logWarn, logDebug} = require('../utils/log');
 const { validateInstallModules } = require('../utils/validator');
 const { detectHostModule } = require('../utils/hosting');
 
 // 主函数：预安装依赖
 function preInstallModules(rulesPath) {
-    logInfo('预安装依赖开始');
-
     let installList = []; // 在函数顶部声明，初始化为空数组
     try {
         // 提取npm依赖
         installList = preExtractModules(rulesPath);
         if (installList.length === 0) {
-            logInfo('无缺失依赖，跳过安装');
+            logWarn('无缺失依赖，跳过安装');
             return;
         }
 
@@ -26,13 +24,21 @@ function preInstallModules(rulesPath) {
         validateInstallModules(installList);
         logInfo('所有依赖已就绪\n');
     } catch (error) {
-        logInfo('预处理失败，请尝试手动安装:npm install -g ', installList.join(' '));
-        process.exit(1);
-    } finally {
-        logInfo('预安装依赖结束\n');
+        logError('预处理失败，请尝试手动安装:npm install -g ', installList.join(' '));
     }
 }
 
+function preInstallRuleModules(rulesPath){
+    logInfo('预安装规则文件依赖开始');
+    preInstallModules(rulesPath)
+    logInfo('预安装规则文件依赖结束\n');
+}
+
+function preInstallPluginModules(rulesPath){
+    logInfo('预安装插件依赖开始');
+    preInstallModules(rulesPath)
+    logInfo('预安装插件依赖结束\n');
+}
 //预提取依赖
 function preExtractModules(rulesPath){
     let installList = []; // 在函数顶部声明，初始化为空数组
@@ -42,7 +48,7 @@ function preExtractModules(rulesPath){
 
     // 2. 提取所有 require 的模块名
     const dependencies = extractRequiredModules(fileContent);
-    logInfo('提取依赖模块:', dependencies.join(', '));
+    logDebug('提取依赖模块:', dependencies.join(', '));
 
     // 3. 过滤需要安装的第三方模块
     installList = filterInstallableModules(dependencies);
@@ -93,5 +99,6 @@ function installModules(modules) {
 }
 
 module.exports = {
-    preInstallModules
+    preInstallRuleModules,
+    preInstallPluginModules
 };

@@ -1,5 +1,5 @@
 // utils/fileReader.js
-const fs = require("fs-extra");
+const fs = require("fs");
 const {logInfo,logError} = require("./log");
 const {getRealEncodeByNode} = require("./ruleExt2EncMap");
 let maxSize = 2 //mb

@@ -6,7 +6,7 @@ const {logInfo, logPlugins,logError} = require('../utils/log');
 const {detectHostPlugin,createHostDir} = require('../utils/hosting');
 const {validatePlugin} = require('../utils/validator');
 const {astParseExportData} = require('../utils/ast');
-const {preInstallModules} = require("../preprocess/modules");
+const {preInstallPluginModules} = require("../preprocess/modules");
 
 async function installPlugins(plugins, options) {
     logInfo(`插件安装开始`);
@@ -75,9 +75,10 @@ function getLatestVersion(versions) {
 function loadPlugin() {
     //预处理自定义插件
     const pluginPaths = detectHostPlugin();
+    logInfo('加载插件...');
     pluginPaths.forEach(pluginPath=>{
         //预安装插件依赖的npm
-        preInstallModules(pluginPath)
+        preInstallPluginModules(pluginPath)
     })
 
     //刷新注册表
