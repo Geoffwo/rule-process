@@ -1,6 +1,6 @@
 const fs = require('fs-extra');
 const path = require('path');
-const {logStep} = require('../utils/log');
+const {logInfo,logError} = require('./log');
 
 
 // 新增函数：创建宿主机示例文件
@@ -12,11 +12,11 @@ async function createHostExamples() {
     const sourcePath = path.join(__dirname, '../examples');
 
     // 调试信息（可选）
-    logStep('资源来源路径:', sourcePath);
-    logStep('虚拟文件系统检查:', await fs.pathExists(sourcePath));
+    logInfo('资源来源路径:', sourcePath);
+    logInfo('虚拟文件系统检查:', await fs.pathExists(sourcePath));
 
     if (!(await fs.pathExists(sourcePath))) {
-        throw new Error(`资源路径不存在，请检查打包配置: ${sourcePath}`);
+        logError(`资源路径不存在，请检查打包配置: ${sourcePath}`);
     }
 
     try {
@@ -26,7 +26,7 @@ async function createHostExamples() {
         // 同步复制目录（覆盖已存在文件）
         await copyVirtualDir(sourcePath, hostExampleDir);
         // await fs.copy(sourcePath , hostExampleDir, { overwrite: true });
-        logStep(`示例文件已创建到：${hostExampleDir}\n`);
+        logInfo(`示例文件已创建到：${hostExampleDir}\n`);
     } catch (error) {
         console.error('创建示例文件失败:', error.message);
         process.exit(1);
@@ -56,7 +56,7 @@ function detectHostModule(moduleName) {
     const hostNodeModules = path.join(process.cwd(), 'node_modules');
     const hostModulePath = path.join(hostNodeModules, moduleName);
     if (fs.existsSync(hostModulePath)) {
-        logStep(`检测到本地存在[${moduleName}]模块`)
+        logInfo(`检测到本地存在[${moduleName}]模块`)
         return true;
     }
 
@@ -65,10 +65,15 @@ function detectHostModule(moduleName) {
     for (const globalPath of globalPaths) {
         const globalModulePath = path.join(globalPath, moduleName);
         if (fs.existsSync(globalModulePath)) {
-            logStep(`检测到全局存在[${moduleName}]模块`)
+            logInfo(`检测到全局存在[${moduleName}]模块`)
             return true;
         }
     }
+}
+
+function detectHostPlugin(){
+    const hostDir = detectHostDir('plugin');
+    return hostDir.filter(path=>path.endsWith('.js'));
 }
 
 //检测宿主环境项目的插件（目录）
@@ -83,22 +88,27 @@ function detectHostDir(dir) {
 
     const files = fs.readdirSync(hostDir);
     for (const file of files) {
-        if (!file.endsWith('.js')) continue;
-
         const filePath = path.join(hostDir, file);
         try {
             filePaths.push(filePath);
         } catch (error) {
-            throw new Error(` ${file} 加载失败:`, error.message);
+            logError(`${file} 加载失败:`, error.message);
         }
     }
 
     return filePaths;
 }
 
+function createHostDir(path) {
+    if (!fs.existsSync(path)) {
+        fs.mkdirSync(path, { recursive: true });
+    }
+}
+
 
 module.exports = {
     createHostExamples,
+    createHostDir,
     detectHostModule,
-    detectHostDir
+    detectHostPlugin
 };

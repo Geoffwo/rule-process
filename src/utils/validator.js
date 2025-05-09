@@ -1,10 +1,14 @@
-const {logStep} = require("./log");
+const path = require("path");
+const fs = require("fs");
+const semver = require('semver');
+
+const {logInfo,logError} = require("./log");
 
 function validatePaths(...paths) {
     paths.forEach(path => {
-        logStep( '校验地址:',path);
+        logInfo( '校验地址:',path);
         if (typeof path !== 'string' || !path.trim()) {
-            throw new Error(`路径参数无效: ${path}`);
+            logError(`路径参数无效: ${path}`);
         }
     });
 }
@@ -12,7 +16,7 @@ function validatePaths(...paths) {
 function validateLoadRuleFun(ruleFun) {
     // 检查是否导出函数
     if (typeof ruleFun !== 'function') {
-        throw new Error('规则文件必须导出一个函数');
+        logError('规则文件必须导出一个函数');
     }
 
     return ruleFun;
@@ -24,7 +28,7 @@ function validateLoadRuleFun(ruleFun) {
  * @param {Array} arr
  */
 function validateOutputNode(arr) {
-    if (!Array.isArray(arr))  throw new Error('输入必须为数组');
+    if (!Array.isArray(arr))  logError('输入必须为数组');
 
     validateArrayPathEmpty(arr);
     validateArrayPathIsOnlyDir(arr);
@@ -39,7 +43,7 @@ function validateOutputNode(arr) {
 function validateArrayPathEmpty(arr) {
     const hasEmptyPath = arr.some(item => typeof item.path !== 'string' || !item.path.trim());
     if (hasEmptyPath) {
-        throw new Error('数组中存在 path 字段为空的对象');
+        logError('数组中存在 path 字段为空的对象');
     }
 }
 
@@ -56,7 +60,7 @@ function validateArrayPathIsOnlyDir(arr) {
         return true;
     });
     if (!hasNotOnlyDir) {
-        throw new Error('数组中存在 path 字段[以斜杠结尾或包含文件名]的对象');
+        logError('数组中存在 path 字段[以斜杠结尾或包含文件名]的对象');
     }
 }
 
@@ -73,13 +77,13 @@ function validateArrayContent(arr) {
 
         // 检查 content 是否存在
         if (node.content === undefined || node.content === null) {
-            throw new Error(`文件节点必须包含 content 字段: ${node.path}`);
+            logError(`文件节点必须包含 content 字段: ${node.path}`);
         }
 
         // 校验 content 类型
         const isContentValid = Buffer.isBuffer(node.content) || typeof node.content === 'string';
         if (!isContentValid) {
-            throw new Error(
+            logError(
                 `文件内容类型错误: ${node.path}\n` +
                 `期望类型: Buffer 或 string\n` +
                 `实际类型: ${typeof node.content}`
@@ -88,8 +92,31 @@ function validateArrayContent(arr) {
     }
 }
 
+function validateInstallModules(modules) {
+    modules.forEach(module => {
+        const modulePath = path.join(process.cwd(), 'node_modules', module);
+        if (!fs.existsSync(modulePath)) {
+            logError(`模块未正确安装: ${module}`);
+        }
+    });
+}
+
+function validatePlugin(plugin){
+    // 验证必要字段
+    if (!plugin.name || !plugin.version || !plugin.process) {
+        logError('插件必须包含 name/version/process 字段');
+    }
+
+    // 验证版本格式
+    if (!semver.valid(plugin.version)) {
+        logError(`无效的版本号: ${plugin.version}`);
+    }
+}
+
 module.exports = {
     validatePaths,
     validateOutputNode,
-    validateLoadRuleFun
+    validateLoadRuleFun,
+    validateInstallModules,
+    validatePlugin
 };

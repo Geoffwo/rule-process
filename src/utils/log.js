@@ -1,27 +1,68 @@
-/*! @license rule-process
- * Copyright (c) 2025 geoffwo
- * This source code is licensed under the ISC license
- */
+/* log.js */
+// 定义日志级别常量
+const LogLevel = {
+    ERROR: 0,
+    WARN: 1,
+    INFO: 2,
+    DEBUG: 3,
+    VERBOSE: 4
+};
 
-// 新增模块级变量控制日志
-let enableLog = true
+// 模块级配置
+let currentLogLevel = LogLevel.INFO; // 默认显示 INFO 及以上级别
+let enableLog = true;
 
-function setEnableLog(enable = true){
-    enableLog = enable
+// 设置日志级别
+function setLogLevel(level) {
+    if (typeof level === 'string') {
+        level = LogLevel[level.toUpperCase()] || LogLevel.INFO;
+    }
+    currentLogLevel = Math.max(0, Math.min(level, LogLevel.VERBOSE));
 }
 
-function logStep(...args){
-    if (!enableLog) return // 根据标志决定是否输出
-    logStepInfo(...args)
+function getLevelName(level) {
+    return Object.keys(LogLevel).find(key => LogLevel[key] === level);
 }
 
-function logStepInfo(...args){
-    const prefix  = `${'='.repeat(40)}> `;
-    console.log(prefix,...args);
+// 统一日志方法
+function log(level, ...args) {
+    if (!enableLog || level > currentLogLevel) return;
+
+    const prefix = `${'='.repeat(30)}> `;
+    const levelTag = `[${getLevelName(level)}]`;
+    console.log(prefix, levelTag, ...args);
+}
+
+// 分级日志函数
+function logError(...args) { log(LogLevel.ERROR, ...args); }
+function logWarn(...args)  { log(LogLevel.WARN, ...args); }
+function logInfo(...args)  { log(LogLevel.INFO, ...args); }
+function logDebug(...args) { log(LogLevel.DEBUG, ...args); }
+function logVerbose(...args) { log(LogLevel.VERBOSE, ...args); }
+
+function logPlugins(plugins) {
+    logInfo(`读取插件列表开始`);
+
+    if (plugins.length === 0) {
+        logInfo('未找到任何插件');
+    }
+
+    let index = 1;
+    plugins.forEach(plugin => {
+        logInfo(`${index++}. ${plugin.name}@${plugin.version}`);
+    });
+
+    logInfo(`读取插件列表结束\n`);
 }
 
 module.exports = {
-    logStep,
-    logStepInfo,
-    setEnableLog
+    LogLevel,
+    setLogLevel,
+    setEnableLog: (enable) => { enableLog = enable; },
+    logError,
+    logWarn,
+    logInfo,
+    logDebug,
+    logVerbose,
+    logPlugins
 };

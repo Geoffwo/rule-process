@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+require('./interface/plugin'); // 确保初始化最先执行 插件系统挂载到全局
+
 const path = require("path");
 const { program } = require('commander')
 const ruleProcess = require('./core/setup')
@@ -63,79 +65,29 @@ program
         }
     })
 
-// 辅助函数：获取元数据
-async function fetchMetadata(source) {
-    const urls = {
-        gitee: 'https://gitee.com/Geoffwo/rule-process-plugin/raw/master/metadata.json',
-        github: 'https://raw.githubusercontent.com/Geoffwo/rule-process-plugin/master/metadata.json'
-    };
-    const response = await axios.get(urls[source]);
-    return response.data;
-}
-
-// 辅助函数：获取最新版本
-function getLatestVersion(versions) {
-    const versionList = Object.keys(versions).sort((a, b) => semver.rcompare(a, b));
-    return versionList[0];
-}
-
-// 辅助函数：更新已安装插件列表
-async function updateInstalledPlugins(pluginName, version, source, installPath) {
-    const installedPath = path.join(process.cwd(), 'plugin', 'installed.json');
-    let installed = {};
-
-    try {
-        const data = await fs.readFile(installedPath, 'utf8');
-        installed = JSON.parse(data);
-    } catch (err) {
-        // 文件不存在时创建
-    }
-
-    installed[pluginName] = { version, source, path: installPath };
-    await fs.writeFile(installedPath, JSON.stringify(installed, null, 2));
-}
-
-// 修改 plugin install 子命令（其他部分保持不变）
+// 批量安装插件
 program
-    .command('install <plugin-spec>')
-    .description('安装插件（示例：xlsx2json@1.0.0）')
+    .command('install <plugins...>') // 接收多个参数
+    .description('批量安装插件（示例：xlsx2json@1.0.0 csv-parser@latest）')
     .option('-s, --source <source>', '下载源（gitee/github）', 'gitee')
-    .action(async (pluginSpec, options) => {
+    .action(async (plugins, options) => {
         try {
-            // 解析插件名称和版本
-            const [pluginName, versionSpec] = pluginSpec.split('@');
-            const requireVersion = versionSpec || 'latest';
-
-            // 获取元数据
-            const metadata = await fetchMetadata(options.source);
-            if (!metadata[pluginName]) throw new Error('插件不存在');
-
-            // 确定目标版本
-            let targetVersion;
-            if (requireVersion === 'latest') {
-                targetVersion = getLatestVersion(metadata[pluginName].versions);
-            } else {
-                if (!metadata[pluginName].versions[requireVersion]) {
-                    throw new Error(`版本 ${requireVersion} 不存在`);
-                }
-                targetVersion = requireVersion;
-            }
-
-            // 创建插件目录（保持原有逻辑）
-            const pluginDir = path.join(process.cwd(), 'plugin', pluginName, targetVersion);
-            await fs.mkdir(pluginDir, { recursive: true });
-
-            // 下载插件（保持原有逻辑）
-            const versionData = metadata[pluginName].versions[targetVersion];
-            const pluginUrl = versionData[options.source];
-            const pluginPath = path.join(pluginDir, 'index.js');
-            const response = await axios.get(pluginUrl);
-            await fs.writeFile(pluginPath, response.data);
-
-            // 更新安装记录（保持原有逻辑）
-            console.log(`✅ 插件 ${pluginName}@${targetVersion} 安装成功`);
+            await ruleProcess.install(plugins, options)
         } catch (error) {
-            console.error('❌ 安装失败:', error.message);
+            console.error('安装失败:', error.message);
+            process.exit(1);
+        }
+    });
+
+// 批量安装插件
+program
+    .command('list') // 读取本地安装的插件
+    .description('读取本地安装的插件')
+    .action(() => {
+        try {
+            ruleProcess.list()
+        } catch (error) {
+            console.error('读取失败:', error.message);
             process.exit(1);
         }
     });

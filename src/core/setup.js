@@ -1,11 +1,10 @@
 const path = require('path');
 const {setEnableLog} = require('../utils/log');
 const {generateBasic} = require('./build');
-const {createHostExamples} = require('./hosting');
-const {setSize,setEncodeInput} = require('../utils/readFile');
-const {preprocessModules} = require('../preprocess/modules')
-const {preprocessPlugins} = require('../preprocess/plugin')
-const {installPlugin} = require('./pluginManager');
+const {createHostExamples} = require('../utils/hosting');
+const {setSize,setEncodeInput} = require('../utils/ruleRead');
+const {preInstallModules} = require('../preprocess/modules')
+const {installPlugins,loadPlugin,listPlugin} = require('./plugin');
 
 const baseConfig = {
     input: path.join(process.cwd(), './examples/inputDir'),    // 默认输入目录
@@ -37,10 +36,10 @@ function build(options={}){
     encodeInput && setEncodeInput(encodeInput);
 
     //预处理自定义插件
-    preprocessPlugins()
+    loadPlugin()
 
     //预处理依赖
-    preprocessModules(rule)
+    preInstallModules(rule)
 
     //自动读取规则 核心
     generateBasic(input, output, rule)
@@ -61,12 +60,17 @@ async function demo() {
  * 用户下载插件
  * @returns {Promise<void>}
  */
-async function install() {
-    // 1. 在宿主机创建示例文件
-    await installPlugin();
+async function install(plugins, options) {
+    // 在宿主机下载插件
+    await installPlugins(plugins,options)
 
     //预处理自定义插件
-    preprocessPlugins()
+    loadPlugin()
+}
+
+function list(){
+    //想要获取本地插件列表，需要先安装本地插件的npm模块
+    listPlugin()
 }
 
 
@@ -74,5 +78,6 @@ module.exports = {
     baseConfig,
     build,
     demo,
-    install
+    install,
+    list
 };

@@ -1,5 +1,5 @@
 // utils/fileReader.js
-const {logStep} = require("./log");
+const {logInfo} = require("./log");
 const encodeObject = {
     // 二进制格式文件
     buffer: [
@@ -39,7 +39,7 @@ const encodeMap = new Map();
  * @param {string} ext - 文件扩展名（带或不带点）
  * @returns {{encode: (any|string), normExt: string}} 编码类型
  */
-function getEncodeByExt(ext) {
+function getEncNodeByExt(ext) {
     if (!ext) {
         return {
             normExt: '',
@@ -54,12 +54,12 @@ function getEncodeByExt(ext) {
 }
 
 function getRealEncodeByNode(node) {
-    logStep(`[${node.normExt}]使用[${node.encode}]编码类型解析`);
+    logInfo(`[${node.normExt}]使用[${node.encode}]编码类型解析`);
     return node.encode === 'buffer' ? null : node.encode
 }
 
 module.exports = {
-    getEncodeByExt,
+    getEncNodeByExt,
     getRealEncodeByNode
 };
 
