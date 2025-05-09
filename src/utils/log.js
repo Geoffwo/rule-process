@@ -9,7 +9,7 @@ const LogLevel = {
 };
 
 // 模块级配置
-let currentLogLevel = LogLevel.INFO; // 默认显示 INFO 及以上级别
+let currentLogLevel = LogLevel.VERBOSE; // 默认显示 INFO 及以上级别
 let enableLog = true;
 
 // 设置日志级别
@@ -34,7 +34,7 @@ function log(level, ...args) {
 }
 
 // 分级日志函数
-function logError(...args) { log(LogLevel.ERROR, ...args); }
+function logError(...args) { log(LogLevel.ERROR, ...args); process.exit(1)}
 function logWarn(...args)  { log(LogLevel.WARN, ...args); }
 function logInfo(...args)  { log(LogLevel.INFO, ...args); }
 function logDebug(...args) { log(LogLevel.DEBUG, ...args); }

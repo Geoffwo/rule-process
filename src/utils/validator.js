@@ -2,7 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const semver = require('semver');
 
-const {logInfo,logError, logDebug} = require("./log");
+const {logError, logDebug} = require("./log");
 
 function validatePaths(...paths) {
     paths.forEach(path => {
