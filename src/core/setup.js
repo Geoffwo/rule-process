@@ -1,5 +1,5 @@
 const path = require('path');
-const {setEnableLog} = require('../utils/log');
+const {setEnableLog,setLogLevel} = require('../utils/log');
 const {generateBasic} = require('./build');
 const {createHostExamples} = require('../utils/hosting');
 const {setSize,setEncodeInput} = require('../utils/ruleRead');
@@ -13,6 +13,30 @@ const baseConfig = {
 }
 
 /**
+ * 通用配置
+ */
+function config(options={}){
+    const {
+        exit, // 从选项获取静默标志
+        size,
+        encode,
+        level
+    }=options
+
+    // 控制日志显示
+    setEnableLog(!exit) // 如果 为 true 则关闭日志
+
+    //设置日志等级
+    setLogLevel(level)
+
+    // 控制读取文件大小
+    size > 0 && setSize(size);
+
+    // 控制读取文件编码方式
+    encode && setEncodeInput(encode);
+}
+
+/**
  * 构建
  * @param options
  */
@@ -20,20 +44,11 @@ function build(options={}){
     const {
         input=baseConfig.input,
         output=baseConfig.output,
-        rule=baseConfig.rule,
-        close, // 从选项获取静默标志
-        size,
-        encodeInput
+        rule=baseConfig.rule
     }=options
 
-    // 控制日志显示
-    setEnableLog(!close) // 如果 close 为 true 则关闭日志
-
-    // 控制读取文件大小
-    size > 0 && setSize(size);
-
-    // 控制读取文件编码方式
-    encodeInput && setEncodeInput(encodeInput);
+    //通用配置 处理option其他参数
+    config(options)
 
     //预处理自定义插件
     loadPlugin()
@@ -73,11 +88,17 @@ function list(){
     listPlugin()
 }
 
+async function uninstall(plugins, options) {
+    // 在宿主机下载插件
+    await uninstallPlugins(plugins, options)
+}
+
 
 module.exports = {
     baseConfig,
     build,
     demo,
     install,
-    list
+    list,
+    uninstall
 };

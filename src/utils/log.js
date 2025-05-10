@@ -1,11 +1,11 @@
 /* log.js */
 // 定义日志级别常量
 const LogLevel = {
-    ERROR: 0,
-    WARN: 1,
-    INFO: 2,
-    DEBUG: 3,
-    VERBOSE: 4
+    ERROR: 1,
+    WARN: 2,
+    INFO: 3,
+    DEBUG: 4,
+    VERBOSE: 5
 };
 
 // 模块级配置
@@ -17,7 +17,7 @@ function setLogLevel(level) {
     if (typeof level === 'string') {
         level = LogLevel[level.toUpperCase()] || LogLevel.INFO;
     }
-    currentLogLevel = Math.max(0, Math.min(level, LogLevel.VERBOSE));
+    currentLogLevel = Math.max(LogLevel.ERROR, Math.min(level, LogLevel.VERBOSE));
 }
 
 function getLevelName(level) {

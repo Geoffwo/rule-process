@@ -77,7 +77,7 @@ function loadPlugin() {
     const pluginPaths = detectHostPlugin();
 
     if(pluginPaths.length === 0) {
-        logWarn('未安装插件')
+        logWarn('未安装插件\n')
         return
     }
 
@@ -126,6 +126,62 @@ function listPlugin() {
     logPlugins(plugins);
 }
 
+async function uninstallPlugins(plugins, options) {
+    logInfo(`插件卸载开始`);
+
+    if (plugins.length === 0) {
+        logWarn('卸载全部插件');
+    }
+
+    // 遍历所有插件
+    for (const pluginSpec of plugins) {
+        // 在宿主机下载插件
+        await uninstallPlugin(pluginSpec, options);
+    }
+
+    logInfo(`插件卸载结束\n`);
+
+}
+async function uninstallPlugin(pluginName, options) {
+    // const isUninstallAll = pluginName === '__all';
+
+    // 步骤1：获取目标插件列表
+    // const pluginPaths = detectHostPlugin();
+    // let toRemove = [];
+
+    // if (isUninstallAll) {
+    //     // 获取全部插件
+    //     toRemove = pluginPaths;
+    //
+    // } else {
+    //     // 原有验证逻辑...
+    //     toRemove = target.filter(name => {
+    //         if (!existingPlugins.includes(name)) {
+    //             logWarn(`插件 ${name} 不存在，跳过卸载`);
+    //             return false;
+    //         }
+    //         return true;
+    //     });
+    // }
+    //
+    // // 后续步骤保持不变...
+    // // 步骤2：收集待卸载插件的依赖
+    // const pluginDeps = new Map();
+    // toRemove.forEach(name => {
+    //     const pluginPath = path.join(pluginDir, `${name}.js`);
+    //     const dependencies = extractRequiredModules(pluginPath);
+    //     pluginDeps.set(name, dependencies);
+    // });
+    //
+    // // 步骤3：分析全局依赖关系
+    // const globalDeps = analyzeGlobalDependencies();
+    //
+    // // 步骤4：计算可安全删除的模块
+    // const safeToRemove = calculateRemovableDeps(pluginDeps, globalDeps);
+    //
+    // // 步骤5：执行卸载操作
+    // await performUninstallation(toRemove, safeToRemove, options);
+}
 
 module.exports = {
     installPlugins,

@@ -30,18 +30,19 @@ program
 program
     .command('run')
     .description('执行规则处理（默认命令）')
-    .option('-i, --input <path>', '输入路径', baseConfig.input)
-    .option('-o, --output <path>', '输出路径', baseConfig.output)
-    .option('-r, --rule <path>', '规则文件', baseConfig.rule)
-    .option('-c, --close', '关闭所有日志输出')
-    .option('-s, --size', '强制更改读取文件大小安全限制')
-    .option('-ci, --encode-input <encoding>', '强制指定输入文件编码')
-    .option('--js-config <path>', '解析JS配置文件')
+    .option('-i, --input <pathUrl>', '输入路径', baseConfig.input)
+    .option('-o, --output <pathUrl>', '输出路径', baseConfig.output)
+    .option('-r, --rule <pathUrl>', '规则文件', baseConfig.rule)
+    .option('-e, --exit', '关闭所有日志输出')
+    .option('-s, --size <size>', '强制更改读取文件大小安全限制')
+    .option('-c, --encode <encode>', '强制指定输入文件编码')
+    .option('-l, --level <level>', '强制更改日志等级')
+    .option('-p --parse <configUrl>', '解析配置文件')
     .action(async (options) => {
         try {
-            const jsConfig = options.jsConfig && require(path.join(process.cwd(), options.jsConfig));
+            const parseConfig = options.parse && require(path.join(process.cwd(), options.parse));
             const finalConfig = {
-                ...jsConfig,  // JS配置
+                ...parseConfig,  // 解析配置文件
                 ...options // 命令行选项（最高优先级）
             };
 
@@ -86,6 +87,19 @@ program
             ruleProcess.list()
         } catch (error) {
            logError('读取失败:', error.message);
+        }
+    });
+
+//批量卸载插件
+program
+    .command('uninstall [plugins...]') // 改为可选参数
+    .description('卸载指定插件（不指定插件名时卸载全部）')
+    .option('-f, --force', '强制删除关联的npm模块')
+    .action(async (plugins, options) => {
+        try {
+            await ruleProcess.uninstall(plugins, options);
+        } catch (error) {
+            logError('卸载失败:', error.message);
         }
     });
 

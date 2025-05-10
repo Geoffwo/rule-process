@@ -17,7 +17,7 @@
   "homepage": "https://gitee.com/Geoffwo/file-rule-process.git#readme",
   "pkg": {
     "assets": [
-      "src/**/*"
+      "src/examples/**/*"
     ],
     "scripts": [],
     "targets": [
@@ -67,5 +67,8 @@
     "acorn": "^8.14.1",
     "acorn-walk": "^8.3.4",
     "axios": "^0.27.2"
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5"
   }
 }
