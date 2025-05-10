@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const semver = require('semver');
-const {logInfo, logPlugins,logError} = require('../utils/log');
+const {logInfo, logPlugins,logError, logWarn} = require('../utils/log');
 const {detectHostPlugin,createHostDir} = require('../utils/hosting');
 const {validatePlugin} = require('../utils/validator');
 const {astParseExportData} = require('../utils/ast');
@@ -75,6 +75,12 @@ function getLatestVersion(versions) {
 function loadPlugin() {
     //预处理自定义插件
     const pluginPaths = detectHostPlugin();
+
+    if(pluginPaths.length === 0) {
+        logWarn('未安装插件')
+        return
+    }
+
     logInfo('加载插件...');
     pluginPaths.forEach(pluginPath=>{
         //预安装插件依赖的npm

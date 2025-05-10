@@ -22,7 +22,7 @@ function preInstallModules(rulesPath) {
 
         // 验证安装结果
         validateInstallModules(installList);
-        logInfo('所有依赖已就绪\n');
+        logInfo('所有依赖已就绪');
     } catch (error) {
         logError('预处理失败，请尝试手动安装:npm install -g ', installList.join(' '));
     }
