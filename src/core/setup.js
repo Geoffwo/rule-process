@@ -4,7 +4,7 @@ const {generateBasic} = require('./build');
 const {createHostExamples} = require('../utils/hosting');
 const {setSize,setEncodeInput} = require('../utils/ruleRead');
 const {preInstallRuleModules} = require('../preprocess/modules')
-const {installPlugins,loadPlugin,listPlugin} = require('./plugin');
+const {installPlugins,loadPlugin,listPlugin,uninstallPlugins} = require('./plugin');
 
 const baseConfig = {
     input: path.join(process.cwd(), './examples/inputDir'),    // 默认输入目录

@@ -91,11 +91,17 @@ function validateArrayContent(arr) {
     }
 }
 
-function validateInstallModules(modules) {
+// ... existing code ...
+function validateModules(modules, type = 'install') {
+    const actionDict = {
+        install: '模块未正确安装',
+        uninstall: '模块未正确卸载'
+    };
     modules.forEach(module => {
         const modulePath = path.join(process.cwd(), 'node_modules', module);
         if (!fs.existsSync(modulePath)) {
-            logError(`模块未正确安装: ${module}`);
+            const action = actionDict[type] || 'error'
+            logError(`${action}: ${module}`);
         }
     });
 }
@@ -116,6 +122,6 @@ module.exports = {
     validatePaths,
     validateOutputNode,
     validateLoadRuleFun,
-    validateInstallModules,
+    validateModules,
     validatePlugin
 };

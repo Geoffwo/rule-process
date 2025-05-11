@@ -6,7 +6,7 @@ const {logInfo, logPlugins,logError, logWarn} = require('../utils/log');
 const {detectHostPlugin,createHostDir} = require('../utils/hosting');
 const {validatePlugin} = require('../utils/validator');
 const {astParseExportData} = require('../utils/ast');
-const {preInstallPluginModules} = require("../preprocess/modules");
+const {preInstallPluginModules,preUninstallPluginModules} = require("../preprocess/modules");
 
 async function installPlugins(plugins, options) {
     logInfo(`插件安装开始`);
@@ -69,6 +69,14 @@ function getLatestVersion(versions) {
     return versionList[0];
 }
 
+//刷新插件注册表
+function refreshPlugin(){
+    //预处理自定义插件
+    const pluginPaths = detectHostPlugin();
+    //刷新注册表
+    pluginSystem.refresh(pluginPaths)
+}
+
 /**
  * 加载插件 添加到注册表
  */
@@ -88,13 +96,13 @@ function loadPlugin() {
     })
 
     //刷新注册表
-    pluginSystem.refresh(pluginPaths)
+    refreshPlugin()
 }
 
 /**
  * 加载单个插件元数据
  */
-function loadPluginMetadata(pluginPath) {
+function getPluginMetadata(pluginPath) {
     // 读取文件内容
     const code = fs.readFileSync(pluginPath, 'utf-8');
 
@@ -120,7 +128,7 @@ function listPlugin() {
     const pluginPaths = detectHostPlugin();
 
     const plugins = pluginPaths.map(pluginPath=>{
-        return loadPluginMetadata(pluginPath)
+        return getPluginMetadata(pluginPath)
     })
 
     logPlugins(plugins);
@@ -131,6 +139,9 @@ async function uninstallPlugins(plugins, options) {
 
     if (plugins.length === 0) {
         logWarn('卸载全部插件');
+        // 卸载全部插件
+        const pluginPaths = detectHostPlugin();
+        plugins = pluginPaths.map(url => path.basename(url, '.js'));
     }
 
     // 遍历所有插件
@@ -139,52 +150,37 @@ async function uninstallPlugins(plugins, options) {
         await uninstallPlugin(pluginSpec, options);
     }
 
+    // 卸载后刷新注册表
+    refreshPlugin()
+
     logInfo(`插件卸载结束\n`);
 
 }
 async function uninstallPlugin(pluginName, options) {
-    // const isUninstallAll = pluginName === '__all';
+    const force = options.force;//是否卸载插件依赖
 
-    // 步骤1：获取目标插件列表
-    // const pluginPaths = detectHostPlugin();
-    // let toRemove = [];
+    const pluginPaths = detectHostPlugin();// 步骤1：获取目标插件列表
+    const targetPath = pluginPaths.find(url => path.basename(url, '.js') === pluginName);// 步骤2：查找目标插件文件
+    if (!targetPath) {
+        logWarn(`未找到插件: ${pluginName}`);
+        return;
+    }
 
-    // if (isUninstallAll) {
-    //     // 获取全部插件
-    //     toRemove = pluginPaths;
-    //
-    // } else {
-    //     // 原有验证逻辑...
-    //     toRemove = target.filter(name => {
-    //         if (!existingPlugins.includes(name)) {
-    //             logWarn(`插件 ${name} 不存在，跳过卸载`);
-    //             return false;
-    //         }
-    //         return true;
-    //     });
-    // }
-    //
-    // // 后续步骤保持不变...
-    // // 步骤2：收集待卸载插件的依赖
-    // const pluginDeps = new Map();
-    // toRemove.forEach(name => {
-    //     const pluginPath = path.join(pluginDir, `${name}.js`);
-    //     const dependencies = extractRequiredModules(pluginPath);
-    //     pluginDeps.set(name, dependencies);
-    // });
-    //
-    // // 步骤3：分析全局依赖关系
-    // const globalDeps = analyzeGlobalDependencies();
-    //
-    // // 步骤4：计算可安全删除的模块
-    // const safeToRemove = calculateRemovableDeps(pluginDeps, globalDeps);
-    //
-    // // 步骤5：执行卸载操作
-    // await performUninstallation(toRemove, safeToRemove, options);
+    //预卸载插件依赖的npm
+    force && preUninstallPluginModules(targetPath)
+
+    // 步骤3：删除插件文件
+    try {
+        fs.unlinkSync(targetPath);
+        logInfo(`插件 ${pluginName} 卸载成功`);
+    } catch (err) {
+        logError(`卸载插件失败: ${pluginName}\n${err.message}`);
+    }
 }
 
 module.exports = {
     installPlugins,
     loadPlugin,
-    listPlugin
+    listPlugin,
+    uninstallPlugins
 };

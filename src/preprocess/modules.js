@@ -2,11 +2,11 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { logInfo,logError, logWarn, logDebug} = require('../utils/log');
-const { validateInstallModules } = require('../utils/validator');
+const { validateModules } = require('../utils/validator');
 const { detectHostModule } = require('../utils/hosting');
 
 // 主函数：预安装依赖
-function preInstallModules(rulesPath) {
+function preprocessModules(rulesPath, action = 'install') {
     let installList = []; // 在函数顶部声明，初始化为空数组
     try {
         // 提取npm依赖
@@ -17,27 +17,33 @@ function preInstallModules(rulesPath) {
         }
 
         // 批量安装缺失模块
-        installModules(installList);
+        processModules(installList,action)
         logInfo('依赖安装完成');
 
         // 验证安装结果
-        validateInstallModules(installList);
+        validateModules(installList, action);
         logInfo('所有依赖已就绪');
     } catch (error) {
-        logError('预处理失败，请尝试手动安装:npm install -g ', installList.join(' '));
+        logError(`预处理失败，请尝试手动安装:npm ${action} -g `, installList.join(' '));
     }
 }
 
 function preInstallRuleModules(rulesPath){
     logInfo('预安装规则文件依赖开始');
-    preInstallModules(rulesPath)
+    preprocessModules(rulesPath)
     logInfo('预安装规则文件依赖结束\n');
 }
 
 function preInstallPluginModules(rulesPath){
     logInfo('预安装插件依赖开始');
-    preInstallModules(rulesPath)
+    preprocessModules(rulesPath)
     logInfo('预安装插件依赖结束\n');
+}
+
+function preUninstallPluginModules(rulesPath){
+    logInfo('预卸载插件依赖开始');
+    preprocessModules(rulesPath,'uninstall')
+    logInfo('预卸载插件依赖结束\n');
 }
 //预提取依赖
 function preExtractModules(rulesPath){
@@ -84,11 +90,11 @@ function filterInstallableModules(modules) {
 }
 
 // 工具函数：批量安装模块
-function installModules(modules) {
+function processModules(modules,param = 'install') {
     const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
     logInfo(`执行安装命令: npm install ${modules.join(' ')} `);
 
-    const result = spawnSync(npmCmd, ['install', ...modules], {
+    const result = spawnSync(npmCmd, [param, ...modules], {
         cwd: process.cwd(),
         stdio: 'inherit'
     });
@@ -100,5 +106,6 @@ function installModules(modules) {
 
 module.exports = {
     preInstallRuleModules,
-    preInstallPluginModules
+    preInstallPluginModules,
+    preUninstallPluginModules
 };
