@@ -91,18 +91,29 @@ function validateArrayContent(arr) {
     }
 }
 
-// ... existing code ...
 function validateModules(modules, type = 'install') {
-    const actionDict = {
-        install: '模块未正确安装',
-        uninstall: '模块未正确卸载'
-    };
     modules.forEach(module => {
         const modulePath = path.join(process.cwd(), 'node_modules', module);
-        if (!fs.existsSync(modulePath)) {
-            const action = actionDict[type] || 'error'
-            logError(`${action}: ${module}`);
+        const exists = fs.existsSync(modulePath);
+
+        // 安装验证：模块必须存在
+        if (type === 'install') {
+            if (!exists) {
+                logError(`模块未正确安装: ${module}`);
+            }
+            return
         }
+
+        // 卸载验证：模块必须不存在
+        if (type === 'uninstall') {
+            if (exists) {
+                logError(`模块未正确卸载: ${module}`);
+            }
+            return
+        }
+
+        // 异常操作类型
+        logError(`未知的验证类型: ${type}`);
     });
 }
 

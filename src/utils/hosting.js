@@ -1,6 +1,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 const {logInfo,logError, logDebug} = require('./log');
+const {globalPaths} = require("module");
 
 
 // 新增函数：创建宿主机示例文件
@@ -49,7 +50,7 @@ async function copyVirtualDir(source, target) {
 }
 
 //检测宿主环境项目的node_modules
-function detectHostModule(moduleName) {
+function detectHostModule(moduleName,isCheckGlobal = false) {
 
     // 方案1: 优先检测宿主环境项目的node_modules
     const hostNodeModules = path.join(process.cwd(), 'node_modules');
@@ -60,12 +61,14 @@ function detectHostModule(moduleName) {
     }
 
     // 方案2: 检测全局安装的模块（可选）
-    const globalPaths = require('module').globalPaths;
-    for (const globalPath of globalPaths) {
-        const globalModulePath = path.join(globalPath, moduleName);
-        if (fs.existsSync(globalModulePath)) {
-            logDebug(`检测到全局存在[${moduleName}]模块`)
-            return true;
+    if(isCheckGlobal){
+        const globalPaths = require('module').globalPaths;
+        for (const globalPath of globalPaths) {
+            const globalModulePath = path.join(globalPath, moduleName);
+            if (fs.existsSync(globalModulePath)) {
+                logDebug(`检测到全局存在[${moduleName}]模块`)
+                return true;
+            }
         }
     }
 }

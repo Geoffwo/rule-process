@@ -9,23 +9,38 @@ const { detectHostModule } = require('../utils/hosting');
 function preprocessModules(rulesPath, action = 'install') {
     let installList = []; // 在函数顶部声明，初始化为空数组
     try {
-        // 提取npm依赖
-        installList = preExtractModules(rulesPath);
+        // 预提取当前页面所有第三方模块
+        const extractModules = preExtractModules(rulesPath);
+
+        // 独立抽取的模块过滤方法
+        installList = getFilteredModules(extractModules, action)
         if (installList.length === 0) {
-            logWarn('无缺失依赖，跳过安装');
+            logWarn(`无缺失依赖，跳过 ${action}`);
             return;
         }
 
         // 批量安装缺失模块
         processModules(installList,action)
-        logInfo('依赖安装完成');
+        logInfo('依赖处理完成');
 
         // 验证安装结果
         validateModules(installList, action);
-        logInfo('所有依赖已就绪');
+        logInfo('所有依赖已正确处理');
     } catch (error) {
-        logError(`预处理失败，请尝试手动安装:npm ${action} -g `, installList.join(' '));
+        logError(`预处理失败，请尝试手动运行:npm ${action} -g `, installList.join(' '));
     }
+}
+
+// 独立抽取的模块过滤方法
+function getFilteredModules(extractModules, action) {
+    if (action === 'install') {
+        return extractModules.filter(module => !detectHostModule(module,true));//不返回已安装的模块,检验全局插件
+    }
+    if (action === 'uninstall') {
+        return extractModules.filter(module => detectHostModule(module));//返回已安装的模块
+    }
+    // 非预期操作返回空数组
+    return [];
 }
 
 function preInstallRuleModules(rulesPath){
@@ -45,21 +60,21 @@ function preUninstallPluginModules(rulesPath){
     preprocessModules(rulesPath,'uninstall')
     logInfo('预卸载插件依赖结束\n');
 }
-//预提取依赖
+//预提取所有第三方模块
 function preExtractModules(rulesPath){
-    let installList = []; // 在函数顶部声明，初始化为空数组
     // 1. 读取规则文件内容
     const fileContent = fs.readFileSync(rulesPath, 'utf-8');
     logInfo('读取文件:',rulesPath);
 
     // 2. 提取所有 require 的模块名
     const dependencies = extractRequiredModules(fileContent);
-    logDebug('提取依赖模块:', dependencies.join(', '));
+    logDebug('提取所有依赖模块:', dependencies.join(', '));
 
-    // 3. 过滤需要安装的第三方模块
-    installList = filterInstallableModules(dependencies);
+    // 过滤需要的第三方模块
+    const extractModules = filterInstallableModules(dependencies);
+    logDebug('提取所有第三方模块:', extractModules.join(', '));
 
-    return installList
+    return extractModules
 }
 
 // 工具函数：提取 require 模块名
@@ -83,8 +98,7 @@ function filterInstallableModules(modules) {
         return (
             !coreModules.has(module) &&
             !module.startsWith('.') &&
-            !module.startsWith('/') &&
-            !detectHostModule(module) //检测已安装的模块
+            !module.startsWith('/')
         );
     });
 }
@@ -92,7 +106,7 @@ function filterInstallableModules(modules) {
 // 工具函数：批量安装模块
 function processModules(modules,param = 'install') {
     const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-    logInfo(`执行安装命令: npm install ${modules.join(' ')} `);
+    logInfo(`执行命令: npm ${param} ${modules.join(' ')} `);
 
     const result = spawnSync(npmCmd, [param, ...modules], {
         cwd: process.cwd(),
@@ -100,7 +114,7 @@ function processModules(modules,param = 'install') {
     });
 
     if (result.status !== 0) {
-        logError(`安装失败，退出码 ${result.status}`);
+        logError(`执行失败，退出码 ${result.status}`);
     }
 }
 

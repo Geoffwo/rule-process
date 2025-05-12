@@ -9,7 +9,7 @@ const LogLevel = {
 };
 
 // 模块级配置
-let currentLogLevel = LogLevel.VERBOSE; // 默认显示 INFO 及以上级别
+let currentLogLevel = LogLevel.INFO; // 默认显示 INFO 及以上级别
 let enableLog = true;
 
 // 设置日志级别
