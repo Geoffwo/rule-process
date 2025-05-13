@@ -7,9 +7,6 @@ triggers:
     branches:
       precise:
         - dev-cli-打包
-    tags:
-      prefix:
-        - v
 stages:
   - name: stage-3173e0fe
     displayName: 打包
@@ -27,7 +24,11 @@ stages:
           - npm config set registry https://registry.npmmirror.com
           - ''
           - '# 执行编译命令'
-          - npm install & npm run build
+          - 'npm install '
+          - ''
+          - npm install pkg
+          - ''
+          - npm run build
         artifacts:
           - name: BUILD_ARTIFACT
             path:
