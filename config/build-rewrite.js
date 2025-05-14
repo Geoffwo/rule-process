@@ -5,7 +5,7 @@ async function main() {
     const ResEdit = await import('resedit');
     const PELibrary = await import('pe-library');
 
-    const exePath = path.join(process.cwd(), 'dist', 'rule-process.exe');
+    const exePath = path.join(process.cwd(), 'dist', 'rule-process-win.exe');
     const icoPath = path.join(process.cwd(), 'assets', 'icon.ico');
 
     if (!fs.existsSync(exePath)) throw new Error(`EXE 未生成，请先运行 pkg 命令: ${exePath}`);
