@@ -14,8 +14,10 @@ let enableLog = true;
 
 // 设置日志级别
 function setLogLevel(level) {
+    level = level || LogLevel.INFO;
+
     if (typeof level === 'string') {
-        level = LogLevel[level.toUpperCase()] || LogLevel.INFO;
+        level = LogLevel[level.toUpperCase()];
     }
     currentLogLevel = Math.max(LogLevel.ERROR, Math.min(level, LogLevel.VERBOSE));
 }
