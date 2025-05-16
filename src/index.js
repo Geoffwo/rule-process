@@ -11,7 +11,7 @@ const baseConfig =  ruleProcess.baseConfig // 基础配置
 // 双击窗口显示帮助 isTTY是false
 if (process.argv.length === 2) {
     console.log('请在命令行窗口（cmd/powershell/终端）中运行本工具！');
-    console.log('如需查看帮助，请执行：rule-process.exe -h');
+    console.log('如需查看帮助，请执行：rule-process -h');
     setTimeout(() => {
         process.exit(0)
     },3000); // 停留3秒

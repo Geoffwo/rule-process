@@ -1,6 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
+/**
+ * window 处理工具
+ * @returns {Promise<void>}
+ */
 async function main() {
     const ResEdit = await import('resedit');
     const PELibrary = await import('pe-library');
@@ -54,7 +58,7 @@ async function main() {
             FileVersion: '1.0.0.0',     // 显示在资源管理器的版本
             InternalName: 'rule-process', // 内部名称
             LegalCopyright: '© 2024 geoffwo. 保留所有权利。', // 版权声明
-            OriginalFilename: 'rule-process.exe', // 原始文件名
+            OriginalFilename: 'rule-process-win.exe', // 原始文件名
             ProductName: '智能规则处理器 (rule-process)', // 产品名称
             ProductVersion: '1.0',      // 显示给用户的简化版本
         }
