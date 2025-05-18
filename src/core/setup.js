@@ -40,7 +40,7 @@ function config(options={}){
  * 构建
  * @param options
  */
-function build(options={}){
+async function build(options={}){
     const {
         input=baseConfig.input,
         output=baseConfig.output,
@@ -57,7 +57,7 @@ function build(options={}){
     preInstallRuleModules(rule)
 
     //自动读取规则 核心
-    generateBasic(input, output, rule)
+    await generateBasic(input, output, rule)
 }
 
 /**

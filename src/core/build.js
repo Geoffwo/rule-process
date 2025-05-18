@@ -13,39 +13,39 @@ const {createHostDir} = require('../utils/hosting');
  * @param {string} outputPath - 输出路径（文件或目录）
  * @param {string} rulesPath - 模板规则文件路径
  */
-function generateBasic(inputPath, outputPath, rulesPath) {
+async function generateBasic(inputPath, outputPath, rulesPath) {
     try {
         logDebug('校验所有路径地址开始');
         validatePaths(inputPath, outputPath, rulesPath);
-        logDebug('校验所有路径地址结束','\n');
+        logDebug('校验所有路径地址结束', '\n');
 
         logInfo('获取输入文件列表开始');
         const inputArray = getInputArray(inputPath);
-        logInfo('获取输入文件列表结束','\n');
+        logInfo('获取输入文件列表结束', '\n');
 
         logInfo('模板导入开始');
         const ruleFun = loadRuleFun(rulesPath);
-        logInfo('模板导入结束','\n');
+        logInfo('模板导入结束', '\n');
 
         logDebug('校验模板开始');
         validateLoadRuleFun(ruleFun);
-        logDebug('校验模板结束','\n');
+        logDebug('校验模板结束', '\n');
 
         logInfo('生成输出结构开始');
-        const outputArray = buildOutputArray(inputArray, ruleFun, outputPath);
-        logInfo('生成输出结构结束','\n');
+        const outputArray = await buildOutputArray(inputArray, ruleFun, outputPath);
+        logInfo('生成输出结构结束', '\n');
 
         logDebug('校验输出结构开始');
         validateOutputNode(outputArray);
-        logDebug('校验输出结构结束','\n');
+        logDebug('校验输出结构结束', '\n');
 
         logInfo('处理所有输出节点开始');
         processOutputArray(outputArray);
-        logInfo('处理所有输出节点结束','\n');
+        logInfo('处理所有输出节点结束', '\n');
 
-        logInfo( `生成成功！`);
+        logInfo(`生成成功！`);
     } catch (error) {
-        logInfo( `生成文件失败:`, error);
+        logError(`生成文件失败:`, error);
     }
 }
 
@@ -127,12 +127,17 @@ function loadRuleFun(rulesPath){
     }
 }
 
-function buildOutputArray(inputArray, ruleFuc, outputPath) {
+async function buildOutputArray(inputArray, ruleFuc, outputPath) {
     const outputNodeDoc = getOutputNodeDoc(outputPath);
-    logInfo( '导出对象数组,其中 node模板:\n',outputNodeDoc,'\n');
+    logInfo('导出对象数组,其中 node模板:\n', outputNodeDoc, '\n');
 
     const outputNodeTemplate = getOutputNodeTemplate(outputPath);
-    return ruleFuc(inputArray, outputNodeTemplate);
+
+    try {
+        return await ruleFuc(inputArray, outputNodeTemplate);
+    } catch (err) {
+        logError(`规则文件异常: ${err.message}`);
+    }
 }
 
 function processOutputArray(outputArray) {

@@ -9,7 +9,7 @@ const LogLevel = {
 };
 
 // 模块级配置
-let currentLogLevel = LogLevel.DEBUG; // 默认显示 INFO 及以上级别
+let currentLogLevel = LogLevel.VERBOSE; // 默认显示 INFO 及以上级别
 let enableLog = true;
 
 // 设置日志级别
@@ -28,7 +28,7 @@ function getLevelName(level) {
 
 // 统一日志方法
 function log(level, ...args) {
-    if (!enableLog || level > currentLogLevel) return;
+    if (!enableLog || level >= currentLogLevel) return;
 
     const prefix = `${'='.repeat(30)}> `;
     const levelTag = `[${getLevelName(level)}]`;
