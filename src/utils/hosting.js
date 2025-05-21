@@ -1,7 +1,53 @@
 const fs = require('fs-extra');
 const path = require('path');
+const ini = require('ini');
 const {logInfo,logError, logDebug} = require('./log');
 const {globalPaths} = require("module");
+
+// 新增配置文件加载函数
+function loadHostConfig(pathUrl,baseConfig) {
+    const configPath =  pathUrl || path.join(process.cwd(), './config.ini');
+    const ext = path.extname(configPath).toLowerCase();
+
+    if (!fs.existsSync(configPath)) {
+        createHostConfig(baseConfig)
+        return baseConfig
+    }
+
+    try {
+        if (ext === '.js') {
+            return require(configPath);
+        } else if (ext === '.ini') {
+            const content = fs.readFileSync(configPath, 'utf8');
+            return ini.parse(content);
+        } else {
+            logError(`不支持的配置文件格式: ${ext}`);
+        }
+    } catch (error) {
+        logError(`配置文件解析失败: ${error.message}`);
+    }
+}
+
+async function createHostConfig(baseConfig) {
+    // 宿主机示例目录路径
+    const hostExampleDir= path.join(process.cwd(), './config.ini');
+
+    const config={
+        ...baseConfig
+    }
+    const iniContent = ini.stringify(config);//生成INI
+    try {
+        // 确保父目录存在
+        const parentDir = path.dirname(hostExampleDir);
+        createHostDir(parentDir)
+
+        // 同步复制目录（覆盖已存在文件）
+        fs.writeFileSync(hostExampleDir, iniContent);
+        logInfo(`配置文件已创建到：${hostExampleDir}\n`);
+    } catch (error) {
+        logError('配置文件创建失败:', error.message);
+    }
+}
 
 
 // 新增函数：创建宿主机示例文件
@@ -12,17 +58,18 @@ async function createHostExamples() {
     // 源路径
     const sourcePath = path.join(__dirname, '../examples');
 
+    const sourcePathExists = fs.existsSync(sourcePath)
     // 调试信息（可选）
     logDebug('资源来源路径:', sourcePath);
-    logDebug('虚拟文件系统检查:', await fs.pathExists(sourcePath));
+    logDebug('虚拟文件系统检查:', sourcePathExists);
 
-    if (!(await fs.pathExists(sourcePath))) {
+    if (!sourcePathExists) {
         logError(`资源路径不存在，请检查打包配置: ${sourcePath}`);
     }
 
     try {
-        // 强制创建目标目录
-        await fs.ensureDir(hostExampleDir);
+        // 确保父目录存在
+        createHostDir(hostExampleDir)
 
         // 同步复制目录（覆盖已存在文件）
         await copyVirtualDir(sourcePath, hostExampleDir);
@@ -33,18 +80,28 @@ async function createHostExamples() {
     }
 }
 
-async function copyVirtualDir(source, target) {
-    const files = await fs.readdir(source);
+function copyVirtualDir(source, target) {
+    // 读取目录内容（同步）
+    const files = fs.readdirSync(source);
+
     for (const file of files) {
         const sourcePath = path.join(source, file);
         const targetPath = path.join(target, file);
-        const stats = await fs.stat(sourcePath);
+
+        // 获取文件信息（同步）
+        const stats = fs.statSync(sourcePath);
+
         if (stats.isDirectory()) {
-            await fs.ensureDir(targetPath);
-            await copyVirtualDir(sourcePath, targetPath);
+            createHostDir(targetPath); // 假设这是同步方法
+
+            // 递归拷贝子目录（同步）
+            copyVirtualDir(sourcePath, targetPath);
         } else {
-            const content = await fs.readFile(sourcePath);
-            await fs.outputFile(targetPath, content);
+            // 读取文件内容（同步）
+            const content = fs.readFileSync(sourcePath);
+
+            // 写入文件（同步，自动创建目录）
+            fs.writeFileSync(targetPath, content);
         }
     }
 }
@@ -62,7 +119,6 @@ function detectHostModule(moduleName,isCheckGlobal = false) {
 
     // 方案2: 检测全局安装的模块（可选）
     if(isCheckGlobal){
-        const globalPaths = require('module').globalPaths;
         for (const globalPath of globalPaths) {
             const globalModulePath = path.join(globalPath, moduleName);
             if (fs.existsSync(globalModulePath)) {
@@ -112,5 +168,7 @@ module.exports = {
     createHostExamples,
     createHostDir,
     detectHostModule,
-    detectHostPlugin
+    detectHostPlugin,
+    loadHostConfig,
+    createHostConfig
 };

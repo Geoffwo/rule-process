@@ -1,7 +1,7 @@
 const path = require('path');
 const {setEnableLog,setLogLevel} = require('../utils/log');
 const {generateBasic} = require('./build');
-const {createHostExamples} = require('../utils/hosting');
+const {createHostExamples,createHostConfig} = require('../utils/hosting');
 const {setSize,setEncodeInput} = require('../utils/ruleRead');
 const {preInstallRuleModules} = require('../preprocess/modules')
 const {installPlugins,loadPlugin,listPlugin,uninstallPlugins} = require('./plugin');
@@ -17,14 +17,14 @@ const baseConfig = {
  */
 function config(options={}){
     const {
-        exit, // 从选项获取静默标志
+        display, // 从选项获取静默标志
         size,
         encode,
         level
     }=options
 
     // 控制日志显示
-    setEnableLog(!exit) // 如果 为 true 则关闭日志
+    setEnableLog(!display) // 如果 为 true 则关闭日志
 
     //设置日志等级
     setLogLevel(level)
@@ -64,11 +64,12 @@ async function build(options={}){
  * 用户快速示例
  * @returns {Promise<void>}
  */
-async function demo() {
+async function init() {
     // 1. 在宿主机创建示例文件
     await createHostExamples();
+    await createHostConfig(baseConfig);
 
-    build() // 直接使用 baseConfig 默认值
+    await build() // 直接使用 baseConfig 默认值
 }
 
 /**
@@ -97,7 +98,7 @@ async function uninstall(plugins, options) {
 module.exports = {
     baseConfig,
     build,
-    demo,
+    init,
     install,
     list,
     uninstall

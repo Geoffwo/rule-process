@@ -127,14 +127,14 @@ function loadRuleFun(rulesPath){
     }
 }
 
-async function buildOutputArray(inputArray, ruleFuc, outputPath) {
+async function buildOutputArray(inputArray, ruleFun, outputPath) {
     const outputNodeDoc = getOutputNodeDoc(outputPath);
     logInfo('导出对象数组,其中 node模板:\n', outputNodeDoc, '\n');
 
     const outputNodeTemplate = getOutputNodeTemplate(outputPath);
 
     try {
-        return await ruleFuc(inputArray, outputNodeTemplate);
+        return await ruleFun(inputArray, outputNodeTemplate);
     } catch (err) {
         logError(`规则文件异常: ${err.message}`);
     }

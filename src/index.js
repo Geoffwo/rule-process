@@ -4,6 +4,7 @@ require('./interface/plugin'); // 确保初始化最先执行 插件系统挂载
 const path = require("path");
 const { program } = require('commander')
 const ruleProcess = require('./core/setup')
+const {loadHostConfig} = require('./utils/hosting')
 const {logError} = require('./utils/log')
 
 const baseConfig =  ruleProcess.baseConfig // 基础配置
@@ -30,17 +31,17 @@ program
 program
     .command('run')
     .description('执行规则处理（默认命令）')
-    .option('-i, --input <pathUrl>', '输入路径', baseConfig.input)
-    .option('-o, --output <pathUrl>', '输出路径', baseConfig.output)
-    .option('-r, --rule <pathUrl>', '规则文件', baseConfig.rule)
-    .option('-e, --exit', '关闭所有日志输出')
+    .option('-i, --input <pathUrl>', '输入路径')
+    .option('-o, --output <pathUrl>', '输出路径')
+    .option('-r, --rule <pathUrl>', '规则文件')
+    .option('-d, --display', '关闭所有日志输出')
     .option('-s, --size <size>', '强制更改读取文件大小安全限制')
-    .option('-c, --encode <encode>', '强制指定输入文件编码')
+    .option('-e, --encode <encode>', '强制指定输入文件编码')
     .option('-l, --level <level>', '强制更改日志等级')
-    .option('-p --parse <configUrl>', '解析配置文件')
+    .option('-c --config <configUrl>', '解析配置文件')
     .action(async (options) => {
         try {
-            const parseConfig = options.parse && require(path.join(process.cwd(), options.parse));
+            const parseConfig = loadHostConfig(options.config,baseConfig);
             const finalConfig = {
                 ...parseConfig,  // 解析配置文件
                 ...options // 命令行选项（最高优先级）
@@ -54,12 +55,12 @@ program
 
 // 新增默认构建指令
 program
-    .command('demo') // 子命令名称
+    .command('init') // 子命令名称
     .description('使用默认配置快速构建演示案例，会直接覆盖examples文件')
     .addHelpText('after', '\n注释说明:\n  该命令会强制覆盖examples目录下的文件\n  适用于首次使用或重置演示案例') // 添加子命令注释
     .action(async () => {
         try {
-            await ruleProcess.demo()
+            await ruleProcess.init()
         } catch (error) {
            logError('默认构建失败:', error.message)
         }
