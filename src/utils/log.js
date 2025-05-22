@@ -28,11 +28,12 @@ function getLevelName(level) {
 
 // 统一日志方法
 function log(level, ...args) {
-    if (!enableLog || level >= currentLogLevel) return;
+    if (!enableLog || level > currentLogLevel) return;
 
-    const prefix = `${'='.repeat(30)}> `;
-    const levelTag = `[${getLevelName(level)}]`;
-    console.log(prefix, levelTag, ...args);
+    const timeTag = `${new Date().toLocaleTimeString()}`.padStart(10,' ');
+    const levelTag = `${getLevelName(level)}`.padStart(7,' ');
+    const prefix = `: `;
+    console.log(timeTag, levelTag, prefix, ...args);
 }
 
 // 分级日志函数

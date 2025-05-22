@@ -79,7 +79,7 @@ class PluginSystem {
         global.__PLUGIN_SYSTEM_INITIALIZED__ = true;
 
         // 4. 记录日志
-        logVerbose('插件系统已挂载到全局\n');
+        // logVerbose('插件系统已挂载到全局\n');//无法根据指令控制日志等级，日志不记录
     }
 })();
 
