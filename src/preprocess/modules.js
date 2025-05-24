@@ -4,27 +4,36 @@ const { spawnSync } = require('child_process');
 const { logInfo,logError, logWarn, logDebug} = require('../utils/log');
 const { validateModules } = require('../utils/validator');
 const { detectHostModule } = require('../utils/hosting');
+const { astParseExportData } = require('../utils/ast');
 
 // 主函数：预安装依赖
 function preprocessModules(rulesPath, action = 'install') {
     let installList = []; // 在函数顶部声明，初始化为空数组
     try {
-        // 预提取当前页面所有第三方模块
-        const extractModules = preExtractModules(rulesPath);
+        // 1.读取文件
+        const fileContent = fs.readFileSync(rulesPath, 'utf-8');
+        logInfo('读取文件:',rulesPath);
 
-        // 独立抽取的模块过滤方法
-        installList = getFilteredModules(extractModules, action)
-        if (installList.length === 0) {
+        // 2.预提取当前页面所有第三方模块
+        const extractModules = preExtractModules(fileContent);
+
+        // 3.独立抽取的模块过滤方法
+        const installModules = getFilteredModules(extractModules, action)
+        if (installModules.length === 0) {
             logWarn(`无缺失依赖，跳过 ${action}`);
             return;
         }
 
-        // 批量安装缺失模块
+        // 4.获取插件npm依赖的版本信息
+        installList = addModulesVersion(fileContent,installModules,action);
+        logDebug(`模块追加 ${action} 版本:`, installList.join(', '));
+
+        // 5.批量安装缺失模块
         processModules(installList,action)
         logInfo('依赖处理完成');
 
-        // 验证安装结果
-        validateModules(installList, action);
+        // 6.验证安装结果
+        validateModules(installModules, action);
         logInfo('所有依赖已正确处理');
     } catch (error) {
         logError(`预处理失败，请尝试手动运行:npm ${action} -g `, installList.join(' '));
@@ -61,20 +70,36 @@ function preUninstallPluginModules(rulesPath){
     logInfo('预卸载插件依赖结束\n');
 }
 //预提取所有第三方模块
-function preExtractModules(rulesPath){
-    // 1. 读取规则文件内容
-    const fileContent = fs.readFileSync(rulesPath, 'utf-8');
-    logInfo('读取文件:',rulesPath);
+function preExtractModules(fileContent){
 
-    // 2. 提取所有 require 的模块名
+    // 1. 提取所有 require 的模块名
     const dependencies = extractRequiredModules(fileContent);
     logDebug('提取所有依赖模块:', dependencies.join(', '));
 
-    // 过滤需要的第三方模块
+    // 2. 过滤需要的第三方模块
     const extractModules = filterInstallableModules(dependencies);
     logDebug('提取所有第三方模块:', extractModules.join(', '));
 
     return extractModules
+}
+
+function addModulesVersion(fileContent,extractModules,action = 'install'){
+    const plugin = astParseExportData(fileContent);
+
+    if(action === 'install'){
+        return extractModules.map(item=>{
+            const version = plugin.rely && plugin.rely[item];
+            if (!version) {
+                return `${item}@latest`; // 默认策略
+            }
+            return `${item}@${version}`;
+        })
+    }
+
+    if (action === 'uninstall') {
+        return extractModules
+    }
+
 }
 
 // 工具函数：提取 require 模块名
