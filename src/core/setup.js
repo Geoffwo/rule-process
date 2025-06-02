@@ -64,12 +64,14 @@ async function build(options={}){
  * 用户快速示例
  * @returns {Promise<void>}
  */
-async function init() {
+async function init(options) {
     // 1. 在宿主机创建示例文件
     await createHostExamples();
     await createHostConfig(baseConfig);
 
-    await build() // 直接使用 baseConfig 默认值
+    if(options.run){//是否运行初始文件
+        await build() // 直接使用 baseConfig 默认值
+    }
 }
 
 /**

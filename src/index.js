@@ -57,10 +57,10 @@ program
 program
     .command('init') // 子命令名称
     .description('使用默认配置快速构建演示案例，会直接覆盖examples文件')
-    .addHelpText('after', '\n注释说明:\n  该命令会强制覆盖examples目录下的文件\n  适用于首次使用或重置演示案例') // 添加子命令注释
-    .action(async () => {
+    .option('-r, --run', '构建完成后自动运行演示案例')
+    .action(async (options) => {
         try {
-            await ruleProcess.init()
+            await ruleProcess.init(options)
         } catch (error) {
            logError('默认构建失败:', error.message)
         }

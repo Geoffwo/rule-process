@@ -70,5 +70,8 @@
     "acorn-walk": "^8.3.4",
     "axios": "^0.27.2",
     "ini": "^5.0.0"
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5"
   }
 }
