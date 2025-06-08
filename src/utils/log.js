@@ -14,11 +14,19 @@ let enableLog = true;
 
 // 设置日志级别
 function setLogLevel(level) {
-    level = level || currentLogLevel;
-
-    if (typeof level === 'string') {
-        level = LogLevel[level.toUpperCase()];
+    // 1. 处理未传值或假值的情况
+    if (level === undefined || level === null) {
+        level = currentLogLevel;
     }
+
+    // 2. 尝试解析数字（支持数字字符串如 "1"）
+    const levelNumber = Number(level);//解析数字 解析失败是NaN
+    if (!isNaN(levelNumber)) {//如果不是NaN，说明是数字
+        level = levelNumber;//直接赋值
+    }else{// 3. 尝试按日志级别名称解析（如 "DEBUG"）
+        level = LogLevel[level.toUpperCase()] || currentLogLevel;
+    }
+
     currentLogLevel = Math.max(LogLevel.ERROR, Math.min(level, LogLevel.VERBOSE));
 }
 

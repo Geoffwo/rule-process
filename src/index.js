@@ -57,7 +57,7 @@ program
 program
     .command('init') // 子命令名称
     .description('使用默认配置快速构建演示案例，会直接覆盖examples文件')
-    .option('-r, --run', '构建完成后自动运行演示案例')
+    .option('-r, --run', '构建完成后自动运行演示案例')// 只要输入 --run标志 不需要参数，注释所有的入参都会被转换为字符串
     .action(async (options) => {
         try {
             await ruleProcess.init(options)
