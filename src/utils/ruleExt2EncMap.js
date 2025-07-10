@@ -6,7 +6,7 @@ const encodeObject = {
         'png', 'jpg', 'jpeg', 'gif',
         'bmp', 'ico', 'webp', 'tiff',
         'zip', 'rar', 'exe', 'dll',
-        'xlsx','xls'
+        'xlsx','xls', 'wav', 'mp3'
     ],
 
     // UTF-8 文本格式
@@ -14,12 +14,12 @@ const encodeObject = {
         'txt', 'js', 'json', 'html',
         'css', 'csv', 'md', 'xml',
         'yaml', 'yml', 'log', 'ini',
-        'data'
+        'data', 'sig', 'pem'
     ],
 
     // 特殊编码格式（按需扩展）
     latin1: ['dat', 'bin'],
-    base64: ['cer', 'pem']
+    base64: ['.base64'] //很少遇到必须使用base64解密是数据，通常都可以借助buffer/utf-8代替
 };
 
 // 创建快速查询缓存（扩展名 => 编码）
