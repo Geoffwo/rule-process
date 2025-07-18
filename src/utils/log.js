@@ -45,7 +45,7 @@ function log(level, ...args) {
 }
 
 // 分级日志函数
-function logError(...args) { log(LogLevel.ERROR, ...args); process.exit(1)}
+function logError(...args) { log(LogLevel.ERROR, ...args); process.exit(0)}
 function logWarn(...args)  { log(LogLevel.WARN, ...args); }
 function logInfo(...args)  { log(LogLevel.INFO, ...args); }
 function logDebug(...args) { log(LogLevel.DEBUG, ...args); }
