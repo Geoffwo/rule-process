@@ -51,7 +51,7 @@ function logInfo(...args)  { log(LogLevel.INFO, ...args); }
 function logDebug(...args) { log(LogLevel.DEBUG, ...args); }
 function logVerbose(...args) { log(LogLevel.VERBOSE, ...args); }
 
-function logPlugins(plugins,connecte='=>') {
+function logPlugins(plugins,connect='@') {
     logInfo(`读取插件列表开始`);
 
     if (plugins.length === 0) {
@@ -60,7 +60,8 @@ function logPlugins(plugins,connecte='=>') {
 
     let index = 1;
     plugins.forEach(plugin => {
-        logInfo(`${index++}. ${plugin.name} ${connecte} ${plugin.version.join('、')}`);
+        const pluginVersion = Array.isArray(plugin.version) ? plugin.version.join('、') : plugin.version
+        logInfo(`${index++}. ${plugin.name} ${connect} ${pluginVersion}`);
     });
 
     logInfo(`读取插件列表结束\n`);

@@ -114,7 +114,7 @@ function getPluginMetadata(pluginPath) {
 
     return {
         name: plugin.name,
-        version: [plugin.version],
+        version: plugin.version,
         // process: plugin.process
     };
 }
@@ -134,7 +134,7 @@ async function listPlugin(options) {
             return getPluginMetadata(pluginPath)
         })
 
-        logPlugins(plugins,'@');
+        logPlugins(plugins);
     }
 
     if (type === 'remote') {
@@ -152,7 +152,7 @@ async function listPlugin(options) {
             }
         });
 
-        logPlugins(plugins);
+        logPlugins(plugins,'=>');
     }
 }
 
