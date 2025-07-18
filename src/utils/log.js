@@ -51,7 +51,7 @@ function logInfo(...args)  { log(LogLevel.INFO, ...args); }
 function logDebug(...args) { log(LogLevel.DEBUG, ...args); }
 function logVerbose(...args) { log(LogLevel.VERBOSE, ...args); }
 
-function logPlugins(plugins) {
+function logPlugins(plugins,connecte='=>') {
     logInfo(`读取插件列表开始`);
 
     if (plugins.length === 0) {
@@ -60,7 +60,7 @@ function logPlugins(plugins) {
 
     let index = 1;
     plugins.forEach(plugin => {
-        logInfo(`${index++}. ${plugin.name}@${plugin.version}`);
+        logInfo(`${index++}. ${plugin.name} ${connecte} ${plugin.version.join('、')}`);
     });
 
     logInfo(`读取插件列表结束\n`);

@@ -86,9 +86,9 @@ async function install(plugins, options) {
     loadPlugin()
 }
 
-function list(){
-    //想要获取本地插件列表，需要先安装本地插件的npm模块
-    listPlugin()
+function list(options){
+    //获取插件列表
+    listPlugin(options)
 }
 
 async function uninstall(plugins, options) {

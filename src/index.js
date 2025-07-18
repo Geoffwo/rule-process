@@ -82,10 +82,12 @@ program
 // 批量安装插件
 program
     .command('list') // 读取本地安装的插件
-    .description('读取本地安装的插件')
-    .action(() => {
+    .description('读取插件列表')
+    .option('-t, --type <type>', '读取类型 本地库/插件库','local')
+    .option('-s, --source <source>', '下载源（gitee/github）', 'gitee')
+    .action((options) => {
         try {
-            ruleProcess.list()
+            ruleProcess.list(options)
         } catch (error) {
            logError('读取失败:', error.message);
         }

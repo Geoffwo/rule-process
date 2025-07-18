@@ -114,24 +114,46 @@ function getPluginMetadata(pluginPath) {
 
     return {
         name: plugin.name,
-        version: plugin.version,
-        process: plugin.process
+        version: [plugin.version],
+        // process: plugin.process
     };
 }
 
 
 /**
- * 获取本地插件信息，不加载插件
+ * 获取插件信息，不加载插件 默认读取本地
  */
-function listPlugin() {
-    //预处理自定义插件
-    const pluginPaths = detectHostPlugin();
+async function listPlugin(options) {
+    const type = options.type
 
-    const plugins = pluginPaths.map(pluginPath=>{
-        return getPluginMetadata(pluginPath)
-    })
+    if (type === 'local') {
+        //预处理自定义插件
+        const pluginPaths = detectHostPlugin();
 
-    logPlugins(plugins);
+        const plugins = pluginPaths.map(pluginPath => {
+            return getPluginMetadata(pluginPath)
+        })
+
+        logPlugins(plugins,'@');
+    }
+
+    if (type === 'remote') {
+        const source = options.source;//数据源: gitee/github
+        const plugData = await fetchMetadata(source)
+
+        // 遍历每个插件
+        const plugKeys = Object.keys(plugData);
+        const plugins = plugKeys.map(pluginName => {
+            const versionMap = plugData[pluginName].versions;
+            const versionArray = Object.keys(versionMap);
+            return {
+                name: pluginName,
+                version: versionArray,
+            }
+        });
+
+        logPlugins(plugins);
+    }
 }
 
 async function uninstallPlugins(plugins, options) {
