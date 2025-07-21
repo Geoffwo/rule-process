@@ -110,7 +110,12 @@ function getPluginMetadata(pluginPath) {
     const plugin = astParseExportData(code);
 
     //校验插件格式
-    validatePlugin(plugin)
+    const valid = validatePlugin(plugin)
+
+    if(!valid){
+        logWarn(`${plugin.name} 注册失败`);
+        return null
+    }
 
     return {
         name: plugin.name,
@@ -131,7 +136,7 @@ async function listPlugin(options) {
         const pluginPaths = detectHostPlugin();
 
         const plugins = pluginPaths.map(pluginPath => {
-            return getPluginMetadata(pluginPath)
+            return getPluginMetadata(pluginPath).filter(metadata => metadata !== undefined);//筛掉直接return的数据
         })
 
         logPlugins(plugins);

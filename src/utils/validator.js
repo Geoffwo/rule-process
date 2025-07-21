@@ -2,7 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const semver = require('semver');
 
-const {logError, logDebug} = require("./log");
+const {logError, logDebug, logWarn} = require("./log");
 
 function validatePaths(...paths) {
     paths.forEach(path => {
@@ -121,13 +121,23 @@ function validateModules(modules, type = 'install') {
 function validatePlugin(plugin){
     // 验证必要字段
     if (!plugin.name || !plugin.version || !plugin.process) {
-        logError('插件必须包含 name/version/process 字段');
+        logWarn('插件必须包含 name/version/process 字段');
+        return false
+    }
+
+    // 验证是否禁用
+    if (plugin.disable) {
+        logWarn(`插件已禁用`);
+        return false
     }
 
     // 验证版本格式
     if (!semver.valid(plugin.version)) {
-        logError(`无效的版本号: ${plugin.version}`);
+        logWarn(`无效的版本号: ${plugin.version}`);
+        return false
     }
+
+    return true
 }
 
 module.exports = {

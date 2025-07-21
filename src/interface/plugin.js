@@ -1,4 +1,4 @@
-const {logVerbose,logPlugins,logError} = require('../utils/log');
+const {logVerbose,logPlugins,logError, logWarn} = require('../utils/log');
 const {validatePlugin} = require('../utils/validator');
 
 
@@ -45,7 +45,12 @@ class PluginSystem {
      */
     register(plugin) {
         //校验插件格式
-        validatePlugin(plugin)
+        const valid = validatePlugin(plugin)
+
+        if(!valid){
+            logWarn(`已跳过 ${plugin.name} 的注册`);
+            return
+        }
 
         // 存储插件
         this.plugins.set(plugin.name, plugin);
