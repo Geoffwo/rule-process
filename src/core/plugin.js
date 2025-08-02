@@ -136,8 +136,12 @@ async function listPlugin(options) {
         const pluginPaths = detectHostPlugin();
 
         const plugins = pluginPaths.map(pluginPath => {
-            return getPluginMetadata(pluginPath).filter(metadata => metadata !== undefined);//筛掉直接return的数据
-        })
+            const pluginMetadata = getPluginMetadata(pluginPath);
+            if(pluginMetadata===null){
+                return null;
+            }
+            return pluginMetadata.filter(metadata => metadata !== undefined);//筛掉直接return的数据
+        }).filter(Boolean)
 
         logPlugins(plugins);
     }
