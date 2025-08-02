@@ -135,7 +135,9 @@ function processModules(modules,param = 'install') {
 
     const result = spawnSync(npmCmd, [param, ...modules], {
         cwd: process.cwd(),
-        stdio: 'inherit'
+        stdio: 'inherit',
+        shell: process.platform === 'win32', // Windows 必须启用 shell, shell 会自动移除引号
+        windowsVerbatimArguments: process.platform === 'win32' // 保留参数原始格式 参数会原样传递，保留引号
     });
 
     if (result.status !== 0) {
