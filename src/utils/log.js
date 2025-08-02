@@ -38,8 +38,15 @@ function getLevelName(level) {
 function log(level, ...args) {
     if (!enableLog || level > currentLogLevel) return;
 
-    const timeTag = `${new Date().toLocaleTimeString()}`.padStart(10,' ');
-    const levelTag = `${getLevelName(level)}`.padStart(7,' ');
+    const date = new Date();
+    // 手动获取时、分、秒并补零
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    // 生成固定格式 "HH:MM:SS"
+    const timeTag = `${hours}:${minutes}:${seconds}`.padStart(10, ' ');
+
+    const levelTag = `${getLevelName(level)}`.padStart(7, ' ');
     const prefix = `: `;
     console.log(timeTag, levelTag, prefix, ...args);
 }
