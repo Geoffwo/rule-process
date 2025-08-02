@@ -129,6 +129,13 @@ function detectHostModule(moduleName,isCheckGlobal = false) {
     }
 }
 
+function detectHostDepend(){
+    const sourcePath = path.join(process.cwd(), 'package.json');
+    const content = fs.readFileSync(sourcePath,'utf8');
+    const parseJson = JSON.parse(content);
+    return parseJson.devDependencies;
+}
+
 function detectHostPlugin(){
     const hostDir = detectHostDir('plugin');
     return hostDir.filter(path=>path.endsWith('.js'));
@@ -168,6 +175,7 @@ module.exports = {
     createHostExamples,
     createHostDir,
     detectHostModule,
+    detectHostDepend,
     detectHostPlugin,
     loadHostConfig,
     createHostConfig

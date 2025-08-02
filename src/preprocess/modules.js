@@ -3,7 +3,7 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 const { logInfo,logError, logWarn, logDebug} = require('../utils/log');
 const { validateModules } = require('../utils/validator');
-const { detectHostModule } = require('../utils/hosting');
+const { detectHostModule,detectHostDepend } = require('../utils/hosting');
 const { astParseExportData } = require('../utils/ast');
 
 // 主函数：预安装依赖
@@ -25,8 +25,8 @@ function preprocessModules(rulesPath, action = 'install') {
         }
 
         // 4.获取插件npm依赖的版本信息
-        installList = addModulesVersion(fileContent,installModules,action);
-        logDebug(`模块追加 ${action} 版本:`, installList.join(', '));
+        installList = changeModulesVersion(fileContent,installModules,action);
+        logDebug(`模块变更 ${action} 版本:`, installList.join(', '));
 
         // 5.批量安装缺失模块
         processModules(installList,action)
@@ -83,7 +83,7 @@ function preExtractModules(fileContent){
     return extractModules
 }
 
-function addModulesVersion(fileContent,extractModules,action = 'install'){
+function changeModulesVersion(fileContent,extractModules,action = 'install'){
     const plugin = astParseExportData(fileContent);
 
     if(action === 'install'){
@@ -97,7 +97,15 @@ function addModulesVersion(fileContent,extractModules,action = 'install'){
     }
 
     if (action === 'uninstall') {
-        return extractModules
+        //排除系统依赖，不允许删除
+        const depend = detectHostDepend();
+        const modules = Object.keys(depend);//定义系统依赖
+        return extractModules.map(item=>{
+            if (!modules.includes(item)) {
+                return item; // 默认策略
+            }
+            return null
+        }).filter(Boolean)
     }
 
 }

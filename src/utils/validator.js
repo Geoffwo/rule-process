@@ -1,7 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 const semver = require('semver');
-
+const { detectHostDepend } = require('../utils/hosting');
 const {logError, logDebug, logWarn} = require("./log");
 
 function validatePaths(...paths) {
@@ -106,7 +106,11 @@ function validateModules(modules, type = 'install') {
 
         // 卸载验证：模块必须不存在
         if (type === 'uninstall') {
-            if (exists) {
+            //排除系统依赖，不允许验证
+            const depend = detectHostDepend();
+            const modules = Object.keys(depend);//定义系统依赖
+            const sysModule = !modules.includes(module);
+            if (exists && sysModule) {
                 logError(`模块未正确卸载: ${module}`);
             }
             return
