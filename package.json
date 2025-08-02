@@ -60,14 +60,14 @@
   "author": "geoffwo",
   "license": "ISC",
   "devDependencies": {
+    "@yao-pkg/pkg": "^6.6.0",
     "acorn": "^8.14.1",
     "acorn-walk": "^8.3.4",
-    "axios": "^0.27.2",
+    "axios": "^1.7.0",
     "commander": "^11.1.0",
     "fs-extra": "^11.3.0",
     "ini": "^5.0.0",
     "pe-library": "^1.0.1",
-    "@yao-pkg/pkg": "^6.6.0",
     "resedit": "^2.0.3",
     "semver": "^7.7.1"
   },
