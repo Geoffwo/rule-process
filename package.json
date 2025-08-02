@@ -21,9 +21,9 @@
     ],
     "scripts": [],
     "targets": [
-      "node14-win-x64",
-      "node14-linux-x64",
-      "node14-macos-x64"
+      "node18-win-x64",
+      "node18-linux-x64",
+      "node18-macos-x64"
     ]
   },
   "scripts": {
@@ -55,7 +55,7 @@
     "productivity"
   ],
   "engines": {
-    "node": ">=14.18.0"
+    "node": ">=18.20.4"
   },
   "author": "geoffwo",
   "license": "ISC",
@@ -67,7 +67,7 @@
     "fs-extra": "^11.3.0",
     "ini": "^5.0.0",
     "pe-library": "^1.0.1",
-    "pkg": "^5.8.1",
+    "@yao-pkg/pkg": "^6.6.0",
     "resedit": "^2.0.3",
     "semver": "^7.7.1"
   },
