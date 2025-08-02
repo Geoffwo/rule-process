@@ -137,11 +137,8 @@ async function listPlugin(options) {
 
         const plugins = pluginPaths.map(pluginPath => {
             const pluginMetadata = getPluginMetadata(pluginPath);
-            if(pluginMetadata===null){
-                return null;
-            }
-            return pluginMetadata.filter(metadata => metadata !== undefined);//筛掉直接return的数据
-        }).filter(Boolean)
+            return pluginMetadata===null ? null : pluginMetadata;
+        }).filter(Boolean);//筛掉直接return的数据
 
         logPlugins(plugins);
     }

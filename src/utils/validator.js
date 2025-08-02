@@ -28,7 +28,6 @@ function validateLoadRuleFun(ruleFun) {
  * @param {Array} arr
  */
 function validateOutputNode(arr) {
-    console.log(arr);
     if (!Array.isArray(arr))  logError('输入必须为数组');
 
     validateArrayPathEmpty(arr);
