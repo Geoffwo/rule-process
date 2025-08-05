@@ -91,33 +91,29 @@ function validateArrayContent(arr) {
     }
 }
 
-function validateModules(modules, type = 'install') {
+function validateInstallModules(modules) {
     modules.forEach(module => {
         const modulePath = path.join(process.cwd(), 'node_modules', module);
         const exists = fs.existsSync(modulePath);
 
-        // 安装验证：模块必须存在
-        if (type === 'install') {
-            if (!exists) {
-                logError(`模块未正确安装: ${module}`);
-            }
-            return
+        if (!exists) {
+            logError(`模块未正确安装: ${module}`);
         }
+    });
+}
 
-        // 卸载验证：模块必须不存在
-        if (type === 'uninstall') {
-            //排除系统依赖，不允许验证
-            const depend = detectHostDepend();
-            const modules = Object.keys(depend);//定义系统依赖
-            const sysModule = !modules.includes(module);
-            if (exists && sysModule) {
-                logError(`模块未正确卸载: ${module}`);
-            }
-            return
+function validateUninstallModules(modules) {
+    modules.forEach(module => {
+        const modulePath = path.join(process.cwd(), 'node_modules', module);
+        const exists = fs.existsSync(modulePath);
+
+        //排除系统依赖，不允许验证
+        const depend = detectHostDepend();
+        const modules = Object.keys(depend);//定义系统依赖
+        const sysModule = !modules.includes(module);
+        if (exists && sysModule) {
+            logError(`模块未正确卸载: ${module}`);
         }
-
-        // 异常操作类型
-        logError(`未知的验证类型: ${type}`);
     });
 }
 
@@ -147,6 +143,7 @@ module.exports = {
     validatePaths,
     validateOutputNode,
     validateLoadRuleFun,
-    validateModules,
+    validateInstallModules,
+    validateUninstallModules,
     validatePlugin
 };
