@@ -116,11 +116,12 @@ function loadRuleFun(rulesPath){
     logInfo( '加载模板规则地址:',rulesPath);
 
     try{
-        return require(rulesPath)
+        const ruleData = require(rulesPath)
+        return ruleData.process
     }catch (e){
         // 如果找不到模块（只处理 MODULE_NOT_FOUND 错误），则尝试用宿主环境依赖
         if (e.code === 'MODULE_NOT_FOUND') {
-            logError('模块依赖缺失,请执行rule-process init添加依赖');
+            logError('模块依赖缺失,请重新执行rule-process install添加依赖');
         }
         // 其它错误继续抛出
         logError(e);
