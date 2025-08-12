@@ -14,9 +14,6 @@ function preInstallModules(rulesPath) {
         const fileContent = fs.readFileSync(rulesPath, 'utf-8');
         logInfo('读取文件:',rulesPath);
 
-        // 1.5 处理特定指令
-        processExtraInfo(fileContent)
-
         // 2.预提取当前页面所有第三方模块
         const extractModules = preExtractModules(fileContent);
 
@@ -34,6 +31,9 @@ function preInstallModules(rulesPath) {
         // 5.批量安装缺失模块
         processModules(installList,'install')
         logInfo('依赖处理完成');
+
+        // 5.5 处理特定指令
+        processExtraInfo(fileContent)
 
         // 6.验证安装结果
         validateInstallModules(installModules);
