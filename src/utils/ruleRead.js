@@ -2,7 +2,7 @@
 const fs = require("fs");
 const {logInfo,logError} = require("./log");
 const {getRealEncodeByNode} = require("./ruleExt2EncMap");
-let maxSize = 2 //mb
+let maxSize = 200 //mb
 let encode = null
 
 function setSize(size){
