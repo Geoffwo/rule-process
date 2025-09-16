@@ -10,4 +10,11 @@ function writingRules(inputArray,outputNodeTemplate) {
   return new Array(outputNode);
 }
 
-module.exports = writingRules;
+// module.exports = writingRules;
+
+module.exports = {
+  name: 'demo',
+  version: '1.0.0',
+  process: writingRules,
+  description: '这是demo'
+};

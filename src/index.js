@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 require('./interface/plugin'); // 确保初始化最先执行 插件系统挂载到全局
+// require('./rely');//打包需要包含的额外依赖
 
 const path = require("path");
 const { program } = require('commander')

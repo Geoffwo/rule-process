@@ -17,8 +17,13 @@
   "homepage": "https://gitee.com/Geoffwo/file-rule-process.git#readme",
   "pkg": {
     "assets": [
-      "src/examples/**/*"
+      "src/examples/**/*",
+      "node_modules/vosk/lib/binding/vosk-win32-x64.node",
+      "node_modules/vosk/lib/libvosk.dll",
+      "node_modules/ref-napi/build/Release/ref.node",
+      "node_modules/ffi-napi/build/Release/ffi_bindings.node"
     ],
+    "native": ["vosk", "ref-napi","ffi-napi"],
     "scripts": [],
     "targets": [
       "node18-win-x64",
@@ -69,7 +74,11 @@
     "ini": "^5.0.0",
     "pe-library": "^1.0.1",
     "resedit": "^2.0.3",
-    "semver": "^7.7.1"
+    "semver": "^7.7.1",
+    "vosk": "^0.3.39",
+    "ref-napi":"3.0.3",
+    "node-gyp-build": "4.8.4",
+    "ffi-napi": "4.0.3"
   },
   "dependencies": {
   }
