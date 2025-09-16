@@ -84,8 +84,8 @@ program
 program
     .command('list') // 读取本地安装的插件
     .description('读取插件列表')
-    .option('-t, --type <type>', '读取类型 本地库/插件库','local')
-    .option('-s, --source <source>', '下载源（gitee/github）', 'gitee')
+    .option('-t, --type <type>', '读取类型 本地库(local)/插件库(remote)','local')
+    .option('-s, --source <source>', '下载源 国内(gitee)/国外(github)', 'gitee')
     .action((options) => {
         try {
             ruleProcess.list(options)
