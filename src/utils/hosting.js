@@ -82,6 +82,18 @@ async function createHostRely(modeNameArray=[]) {
     }
 }
 
+async function createHostPackage(packageObj) {
+    // 宿主机示例目录路径
+    const hostExampleDir= path.join(process.cwd(), './');
+
+    // 2. 创建配置文件路径
+    const configPath = path.join(hostExampleDir, 'package.json');
+
+    // 同步复制目录（覆盖已存在文件）
+    fs.writeFileSync(configPath, JSON.stringify(packageObj,null,2));
+    logInfo(`配置文件已创建到：${hostExampleDir}\n`);
+}
+
 
 // 新增函数：创建宿主机示例文件
 async function createHostExamples() {
@@ -213,4 +225,5 @@ module.exports = {
     loadHostConfig,
     createHostConfig,
     createHostRely,
+    createHostPackage,
 };
