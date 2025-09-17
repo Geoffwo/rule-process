@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 require('./interface/plugin'); // 确保初始化最先执行 插件系统挂载到全局
-// require('./rely');//打包需要包含的额外依赖
 
 const path = require("path");
 const { program } = require('commander')
@@ -59,6 +58,7 @@ program
     .command('init') // 子命令名称
     .description('使用默认配置快速构建演示案例，会直接覆盖examples文件')
     .option('-r, --run', '构建完成后自动运行演示案例')// 只要输入 --run标志 不需要参数，注释所有的入参都会被转换为字符串
+    .option('-k, --vosk', 'vosk功能专属创建，必须添加参数才能使用')
     .action(async (options) => {
         try {
             await ruleProcess.init(options)

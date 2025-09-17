@@ -49,6 +49,39 @@ async function createHostConfig(baseConfig) {
     }
 }
 
+async function createHostRely(modeNameArray=[]) {
+    for (let i = 0; i < modeNameArray.length; i++) {
+        const item=modeNameArray[i]
+        // 宿主机示例目录路径
+        const hostExampleDir= path.join(process.cwd(), './node_modules/',item);
+        console.log('hostExampleDir',hostExampleDir);
+
+        // 源路径
+        const sourcePath = path.join(__dirname, '../../node_modules/',item);
+        console.log('sourcePath',sourcePath);
+
+        const sourcePathExists = fs.existsSync(sourcePath)
+        // 调试信息（可选）
+        logDebug('依赖来源路径:', sourcePath);
+        logDebug('虚拟文件系统检查:', sourcePathExists);
+
+        if (!sourcePathExists) {
+            logError(`依赖路径不存在，请检查打包配置: ${sourcePath}`);
+        }
+
+        try {
+            // 确保父目录存在
+            createHostDir(hostExampleDir)
+
+            // 同步复制目录（覆盖已存在文件）
+            await copyVirtualDir(sourcePath, hostExampleDir);
+            logInfo(`依赖文件已创建到：${hostExampleDir}\n`);
+        } catch (error) {
+            logError('创建依赖文件失败:', error.message);
+        }
+    }
+}
+
 
 // 新增函数：创建宿主机示例文件
 async function createHostExamples() {
@@ -178,5 +211,6 @@ module.exports = {
     detectHostDepend,
     detectHostPlugin,
     loadHostConfig,
-    createHostConfig
+    createHostConfig,
+    createHostRely,
 };

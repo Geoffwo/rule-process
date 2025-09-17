@@ -1,5 +1,4 @@
 const fs = require('fs');
-const path = require('path');
 const { spawnSync } = require('child_process');
 const { logInfo,logError, logWarn, logDebug} = require('../utils/log');
 const { validateInstallModules,validateUninstallModules } = require('../utils/validator');

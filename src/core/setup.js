@@ -1,7 +1,7 @@
 const path = require('path');
 const {setEnableLog,setLogLevel} = require('../utils/log');
 const {generateBasic} = require('./build');
-const {createHostExamples,createHostConfig} = require('../utils/hosting');
+const {createHostExamples,createHostConfig,createHostRely} = require('../utils/hosting');
 const {setSize,setEncodeInput} = require('../utils/ruleRead');
 const {preInstallRuleModules} = require('../preprocess/modules')
 const {installPlugins,loadPlugin,listPlugin,uninstallPlugins} = require('./plugin');
@@ -68,6 +68,11 @@ async function init(options) {
     // 1. 在宿主机创建示例文件
     await createHostExamples();
     await createHostConfig(baseConfig);
+
+    if(options.vosk){//是否涉及vosk功能专属模块
+        const array=['vosk','ffi-napi','ref-napi','debug','ms','node-gyp-build','ref-struct-di']
+        await createHostRely(array);
+    }
 
     if(options.run){//是否运行初始文件
         await build() // 直接使用 baseConfig 默认值

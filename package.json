@@ -18,12 +18,33 @@
   "pkg": {
     "assets": [
       "src/examples/**/*",
-      "node_modules/vosk/lib/binding/vosk-win32-x64.node",
-      "node_modules/vosk/lib/libvosk.dll",
-      "node_modules/ref-napi/build/Release/ref.node",
-      "node_modules/ffi-napi/build/Release/ffi_bindings.node"
+
+      "node_modules/vosk/lib/**/*",
+      "node_modules/vosk/index.js",
+      "node_modules/vosk/package.json",
+
+      "node_modules/ffi-napi/lib/**/*",
+      "node_modules/ffi-napi/prebuilds/**/*",
+      "node_modules/ffi-napi/index.js",
+      "node_modules/ffi-napi/package.json",
+
+      "node_modules/ref-napi/lib/**/*",
+      "node_modules/ref-napi/prebuilds/**/*",
+      "node_modules/ref-napi/index.js",
+      "node_modules/ref-napi/package.json",
+
+      "node_modules/ref-struct-di/lib/**/*",
+      "node_modules/ref-struct-di/index.js",
+      "node_modules/ref-struct-di/package.json",
+
+      "node_modules/node-gyp-build/index.js",
+      "node_modules/node-gyp-build/package.json",
+
+      "node_modules/debug/src/**/*",
+      "node_modules/debug/package.json",
+      "node_modules/ms/index.js",
+      "node_modules/ms/package.json"
     ],
-    "native": ["vosk", "ref-napi","ffi-napi"],
     "scripts": [],
     "targets": [
       "node18-win-x64",
@@ -34,6 +55,7 @@
   "scripts": {
     "build": "npm run build:pkg & npm run build:rewrite",
     "build:pkg": "pkg . --out-path ./dist",
+    "build:pkg:debug": "pkg . --out-path ./dist --debug",
     "build:rewrite": "node ./config/build-rewrite.js",
     "start": "rule-process -s",
     "start:demo": "rule-process demo",
@@ -45,7 +67,8 @@
     "package:copy": "node ./config/copyPackage.js",
     "package:restore": "node config/restorePackage.js",
     "publish:all": "npm run package:copy & npm publish & npm run package:restore",
-    "unpublish:force": "npm unpublish rule-process@1.3.0 --force"
+    "unpublish:force": "npm unpublish rule-process@1.3.0 --force",
+    "install:vosk": "nvm use 14.18.0 & npm install vosk & nvm use 18.20.4"
   },
   "keywords": [
     "cli",
@@ -74,12 +97,9 @@
     "ini": "^5.0.0",
     "pe-library": "^1.0.1",
     "resedit": "^2.0.3",
-    "semver": "^7.7.1",
-    "vosk": "^0.3.39",
-    "ref-napi":"3.0.3",
-    "node-gyp-build": "4.8.4",
-    "ffi-napi": "4.0.3"
+    "semver": "^7.7.1"
   },
   "dependencies": {
+    "vosk": "^0.3.39"
   }
 }
