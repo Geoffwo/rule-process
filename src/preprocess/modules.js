@@ -128,16 +128,27 @@ function preExtractModules(fileContent){
     return extractModules
 }
 
-function installModulesVersion(fileContent,extractModules){
+function installModulesVersion(fileContent, extractModules) {
     const plugin = astParseExportData(fileContent);
+    // 获取rely中的所有模块名（处理plugin.rely可能为undefined的情况）
+    const relyModules = Object.keys(plugin.rely || {});
 
-    return extractModules.map(item=>{
-        const version = plugin.rely && plugin.rely[item];
-        if (!version) {
-            return `${item}@latest`; // 默认策略
-        }
-        return `${item}@${version}`;
-    })
+    // 处理extractModules中的模块：按rely配置版本，无则用latest
+    const processedExtract = extractModules.map(item => {
+        const version =  plugin.rely && plugin.rely[item];
+        return version ? `${item}@${version}` : `${item}@latest`;
+    });
+
+    // 处理rely中存在但不在extractModules中的额外模块
+    const additionalFromRely = relyModules
+        .filter(item => !extractModules.includes(item)) // 筛选不在extractModules中的模块
+        .map(item => {
+            const version = plugin.rely[item];
+            return version ? `${item}@${version}` : `${item}@latest`;
+        });
+
+    // 合并两部分结果并返回
+    return [...processedExtract, ...additionalFromRely];
 }
 
 function uninstallModulesDepend(fileContent,extractModules){
