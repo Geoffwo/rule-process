@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs').promises; // 使用 promise 版本的 fs
 const {setEnableLog,setLogLevel} = require('../utils/log');
 const {generateBasic} = require('./build');
 const {createHostExamples,createHostConfig,createHostRely,createHostPackage} = require('../utils/hosting');
@@ -10,6 +11,17 @@ const baseConfig = {
     input: path.join(process.cwd(), './examples/inputDir'),    // 默认输入目录
     output: path.join(process.cwd(), './examples/outputDir'), // 默认输出文件
     rule: path.join(process.cwd(), './examples/ruleDir/rule.js') // 默认规则文件
+}
+
+// 用于判断是否已初始化：检查 input 和 output 目录是否存在
+async function isInitialized() {
+    try {
+        await fs.access(baseConfig.input);
+        await fs.access(baseConfig.rule);
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 /**
@@ -107,6 +119,24 @@ async function uninstall(plugins, options) {
     await uninstallPlugins(plugins, options)
 }
 
+/**
+ * 点击入口：根据初始化状态自动选择 init 或 build
+ * @returns {Promise<void>}
+ */
+async function click() {
+    const initialized = await isInitialized();
+    if (!initialized) {
+        console.log('首次运行，正在初始化项目...');
+        const options={
+            run:true
+        }
+        await init(options);
+    } else {
+        console.log('项目已初始化，开始构建...');
+        await build();
+    }
+}
+
 
 module.exports = {
     baseConfig,
@@ -114,5 +144,6 @@ module.exports = {
     init,
     install,
     list,
-    uninstall
+    uninstall,
+    click
 };

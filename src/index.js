@@ -9,15 +9,46 @@ const {logError} = require('./utils/log')
 
 const baseConfig =  ruleProcess.baseConfig // 基础配置
 
-// 双击窗口显示帮助 isTTY是false
-if (process.argv.length === 2) {
-    console.log('请在命令行窗口（cmd/powershell/终端）中运行本工具！');
-    console.log('如需查看帮助，请执行：rule-process -h');
-    setTimeout(() => {
-        process.exit(0)
-    },3000); // 停留3秒
+// ===== 第一步：判断是否为“双击”或“无参数调用” =====
+function isInteractiveLaunch() {
+    // 情况1: 完全没有参数（node script.js）
+    if (process.argv.length <= 2) return true;
+
+    // 情况2: 只有一个选项，且不是已知命令（防误判）
+    const args = process.argv.slice(2);
+    const knownCommands = ['run', 'init', 'install', 'list', 'uninstall', '-h', '--help', '-v', '--version'];
+
+    // 如果第一个参数不是已知命令，则可能是误操作或双击
+    return !args.some(arg => knownCommands.includes(arg));
+}
+
+// 如果是双击启动（非终端调用或无参数）
+if (!process.stdin.isTTY || isInteractiveLaunch()) {
+    console.log('欢迎使用 Rule Process 工具！');
+    console.log('请在终端中运行本工具以获得完整功能。');
+    console.log('例如：rule-process -h 查看帮助');
+    console.log('\n即将以向导模式启动...（3秒后开始初始化）\n');
+
+    setTimeout(async () => {
+        try {
+            // 使用 IIFE 包裹异步操作
+            await (async () => {
+                await ruleProcess.click(); // 调用 click，内部判断是 init 还是 build
+            })();
+        } catch (error) {
+            logError('向导模式启动失败:', error.message);
+        } finally {
+            // 延迟退出，让用户看到结果
+            console.log('\n向导模式结束...（3秒后关闭）\n');
+            setTimeout(() => process.exit(0), 3000);
+        }
+    }, 3000);
+
+    // 重要：提前返回，避免后续 parse 再次触发命令
     return;
 }
+
+// ===== 第二步：正常 CLI 模式，开始定义命令 =====
 
 // 全局配置
 program
