@@ -6,7 +6,8 @@ const encodeObject = {
         'png', 'jpg', 'jpeg', 'gif',
         'bmp', 'ico', 'webp', 'tiff',
         'zip', 'rar', 'exe', 'dll',
-        'xlsx','xls', 'wav', 'mp3'
+        'xlsx','xls', 'wav', 'mp3',
+        'docx'
     ],
 
     // UTF-8 文本格式
