@@ -31,17 +31,9 @@ async function generateBasic(inputPath, outputPath, rulesPath) {
         validateLoadRuleFun(ruleFun);
         logDebug('校验模板结束', '\n');
 
-        logInfo('生成输出结构开始');
-        const outputArray = await buildOutputArray(inputArray, ruleFun, outputPath);
-        logInfo('生成输出结构结束', '\n');
-
-        logDebug('校验输出结构开始');
-        validateOutputNode(outputArray);
-        logDebug('校验输出结构结束', '\n');
-
-        logInfo('处理所有输出节点开始');
-        processOutputArray(outputArray);
-        logInfo('处理所有输出节点结束', '\n');
+        logInfo('生成输出开始');
+        await buildOutputArray(inputArray, ruleFun, outputPath);
+        logInfo('生成输出结束', '\n');
 
         logInfo(`生成成功！`);
     } catch (error) {
@@ -135,7 +127,24 @@ async function buildOutputArray(inputArray, ruleFun, outputPath) {
     const outputNodeTemplate = getOutputNodeTemplate(outputPath);
 
     try {
-        return await ruleFun(inputArray, outputNodeTemplate);
+        const outputResult  = await ruleFun(inputArray, outputNodeTemplate);
+
+        // 情况1：返回的是数组 → 全量模式
+        if (Array.isArray(outputResult)) {
+            logInfo('规则返回全量数组...');
+
+            validateOutputNode(outputResult);
+            processOutputArray(outputResult);
+        } else {// 情况2：返回的是可迭代对象(异步/同步)（如 async generator/generator）→ 流式模式
+            logInfo('检测到异步生成器，启用流式处理...');
+
+            // 逐个消费生成器，单个节点出错不中断整体流程
+            for await (const outputArray of outputResult) {
+                // 流式模式下也要校验单个节点的合法性
+                validateOutputNode(outputArray);
+                processOutputArray(outputArray);
+            }
+        }
     } catch (err) {
         logError(`规则文件异常: ${err.message}`);
     }
