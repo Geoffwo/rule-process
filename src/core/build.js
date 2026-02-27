@@ -129,6 +129,12 @@ async function buildOutputArray(inputArray, ruleFun, outputPath) {
     try {
         const outputResult  = await ruleFun(inputArray, outputNodeTemplate);
 
+        // 处理 ruleFun 没有返回值的情况
+        if (outputResult === undefined) {
+            logInfo('规则函数未返回任何值，将自动退出'); // 假设存在 logWarn 日志函数
+            return; // 终止后续逻辑执行
+        }
+
         // 情况1：返回的是数组 → 全量模式
         if (Array.isArray(outputResult)) {
             logInfo('规则返回全量数组...');
