@@ -10,7 +10,7 @@ const {installPlugins,loadPlugin,listPlugin,uninstallPlugins} = require('./plugi
 const baseConfig = {
     input: path.join(process.cwd(), './examples/inputDir'),    // 默认输入目录
     output: path.join(process.cwd(), './examples/outputDir'), // 默认输出文件
-    rule: path.join(process.cwd(), './examples/ruleDir/rule.js') // 默认规则文件
+    rule: path.join(process.cwd(), './examples/ruleDir') // 默认规则文件
 }
 
 // 用于判断是否已初始化：检查 input 和 output 目录是否存在

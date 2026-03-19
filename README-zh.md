@@ -46,7 +46,7 @@ rule-process run [options] #运行基础指令
 |----------------------|---------------------|----------------------------|
 | --input              | 输入目录            | ./examples/inputDir        |
 | --output             | 输出目录            | ./examples/outputDir       |
-| --rule               | 规则文件路径        | ./examples/ruleDir/rule.js |
+| --rule               | 规则文件路径        | ./examples/ruleDir |
 | --close               | 关闭所有日志输出       | false                      |
 | --size               | 强制更改读取文件大小安全限制       | 2MB                        |
 | --encode-input              | 强制指定输入文件编码            | 自动适配                       |
@@ -54,7 +54,11 @@ rule-process run [options] #运行基础指令
 #### 3. 示例
 
 ```bash
-rule-process run --input ./examples/inputDir --output ./examples/outputDir --rule ./examples/ruleDir/rule.js
+rule-process run --input ./examples/inputDir --output ./examples/outputDir --rule ./examples/ruleDir/rule01.js
+```
+
+```bash
+rule-process run --input ./examples/inputDir --output ./examples/outputDir --rule ./examples/ruleDir
 ```
 
 ## 5. 支持与捐赠

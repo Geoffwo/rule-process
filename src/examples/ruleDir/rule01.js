@@ -13,8 +13,8 @@ function writingRules(inputArray,outputNodeTemplate) {
 // module.exports = writingRules;
 
 module.exports = {
-  name: 'demo',
+  name: 'demo01',
   version: '1.0.0',
   process: writingRules,
-  description: '这是demo'
+  description: '这是demo01,会生成一个.data文件'
 };

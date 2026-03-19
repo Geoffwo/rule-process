@@ -46,7 +46,7 @@ rule-process run [options] # Run main command
 |----------------|------------------------------------|-------------------------------|
 | --input        | Input directory                    | ./examples/inputDir           |
 | --output       | Output directory                   | ./examples/outputDir          |
-| --rule         | Rule file path                     | ./examples/ruleDir/rule.js    |
+| --rule         | Rule file path                     | ./examples/ruleDir    |
 | --close        | Disable all log output             | false                         |
 | --size         | Force change file read size limit  | 2MB                           |
 | --encode-input | Force specify input file encoding  | Auto-detect                   |
@@ -54,7 +54,11 @@ rule-process run [options] # Run main command
 #### 3. Example
 
 ```bash
-rule-process run --input ./examples/inputDir --output ./examples/outputDir --rule ./examples/ruleDir/rule.js
+rule-process run --input ./examples/inputDir --output ./examples/outputDir --rule ./examples/ruleDir/rule01.js
+```
+
+```bash
+rule-process run --input ./examples/inputDir --output ./examples/outputDir --rule ./examples/ruleDir
 ```
 
 ## 5. Support & Donation
