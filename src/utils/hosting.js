@@ -215,6 +215,38 @@ function createHostDir(path) {
     }
 }
 
+/**
+ * 加载规则文件（最小MVP）
+ * @param {string} rulePath - 规则文件绝对路径 / 规则目录绝对路径
+ * @returns {string[]} 对应目录下排序后的所有.js规则文件绝对路径数组
+ */
+function loadRuleFiles(rulePath) {
+    // 1. 基础校验：入参为空/路径不存在直接返回空数组
+    if (!rulePath || !fs.existsSync(rulePath)) return [];
+
+    try {
+        // 2. 确定目标目录（文件→取父目录，目录→直接用）
+        const stat = fs.statSync(rulePath);
+        const targetDir = stat.isFile() ? path.dirname(rulePath) : rulePath;
+
+        // 3. 读取目录+筛选.js文件+转绝对路径
+        const jsFiles = fs.readdirSync(targetDir)
+            // 筛选.js文件
+            .filter(file => file.endsWith('.js'))
+            // 转为绝对路径
+            .map(file => path.resolve(targetDir, file))
+            // 按文件名排序（升序）
+            .sort((a, b) => path.basename(a).localeCompare(path.basename(b)));
+
+        logInfo(`加载规则文件:${jsFiles.length}个`)
+
+        return jsFiles;
+    } catch (err) {
+        // 异常兜底：任何错误都返回空数组
+        logError('加载规则文件失败:', err.message);
+        return [];
+    }
+}
 
 module.exports = {
     createHostExamples,
@@ -226,4 +258,5 @@ module.exports = {
     createHostConfig,
     createHostRely,
     createHostPackage,
+    loadRuleFiles,
 };

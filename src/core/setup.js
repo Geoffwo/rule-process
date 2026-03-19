@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs').promises; // 使用 promise 版本的 fs
 const {setEnableLog,setLogLevel} = require('../utils/log');
 const {generateBasic} = require('./build');
-const {createHostExamples,createHostConfig,createHostRely,createHostPackage} = require('../utils/hosting');
+const {createHostExamples,createHostConfig,createHostRely,createHostPackage, loadRuleFiles} = require('../utils/hosting');
 const {setSize,setEncodeInput} = require('../utils/ruleRead');
 const {preInstallRuleModules} = require('../preprocess/modules')
 const {installPlugins,loadPlugin,listPlugin,uninstallPlugins} = require('./plugin');
@@ -65,11 +65,15 @@ async function build(options={}){
     //预处理自定义插件
     loadPlugin()
 
-    //预处理依赖
-    preInstallRuleModules(rule)
+    const ruleFiles = loadRuleFiles(rule);
 
-    //自动读取规则 核心
-    await generateBasic(input, output, rule)
+    for (const ruleFile of ruleFiles) {
+        //预处理依赖
+        await preInstallRuleModules(ruleFile);
+
+        //自动读取规则 核心
+        await generateBasic(input, output, ruleFile);
+    }
 }
 
 /**
