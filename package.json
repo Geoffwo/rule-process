@@ -1,6 +1,6 @@
 {
   "name": "rule-process",
-  "version": "1.4.0",
+  "version": "1.6.1",
   "description": "file rule processing tool",
   "bin": {
     "rule-process": "./src/index.js"
@@ -104,6 +104,13 @@
     "vosk": "^0.3.39"
   },
   "dependencies": {
-
+    "@tensorflow/tfjs": "^4.22.0",
+    "clipboardy": "^2.3.0",
+    "copy-paste": "^2.2.0",
+    "exceljs": "^4.4.0",
+    "mysql2": "^3.22.3",
+    "robotjs": "^0.6.0",
+    "sqlite3": "^6.0.1",
+    "xlsx": "^0.18.0"
   }
 }
