@@ -163,6 +163,23 @@ function uninstallModulesDepend(fileContent,extractModules){
     }).filter(Boolean)
 }
 
+function normalizePackageName(moduleName) {
+    // 作用域包：@scope/name/xxx → @scope/name
+    if (moduleName.startsWith('@')) {
+        const parts = moduleName.split('/');
+        if (parts.length >= 2) {
+            return `${parts[0]}/${parts[1]}`;
+        }
+        return moduleName;
+    }
+    // 普通包：package/subpath → package
+    const slashIndex = moduleName.indexOf('/');
+    if (slashIndex !== -1) {
+        return moduleName.substring(0, slashIndex);
+    }
+    return moduleName;
+}
+
 // 工具函数：提取 require 模块名
 function extractRequiredModules(content) {
     // 正则表达式优化：匹配 require('module') 或 require("module")
@@ -170,7 +187,9 @@ function extractRequiredModules(content) {
     const modules = new Set();
 
     content.replace(regex, function(match, key) {
-        modules.add(key);
+        // 规范化包名
+        const normalized = normalizePackageName(key);
+        modules.add(normalized);
     });
 
     return Array.from(modules);
