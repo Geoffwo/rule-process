@@ -2,9 +2,6 @@
 # 先全局忽略整个 node_modules
 node_modules/
 
-# 例外：保留你要提交的特定目录（路径写完整）
-!node_modules/vosk/
-
 /dist
 /examples
 /plugin
