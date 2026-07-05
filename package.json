@@ -27,7 +27,8 @@
     ]
   },
   "scripts": {
-    "build": "npm run build:pkg & npm run build:rewrite & npm run pack",
+    "dist": "npm run clean & npm run build & npm run pack & npm run clean:bin",
+    "build": "npm run build:pkg & npm run build:rewrite",
     "build:pkg": "pkg . --out-path ./dist",
     "build:pkg:debug": "pkg . --out-path ./dist --debug",
     "build:rewrite": "node ./config/build-rewrite.js",
@@ -35,6 +36,8 @@
     "pack:win": "powershell Compress-Archive -Path ./dist/rule-process-win.exe -DestinationPath ./dist/rule-process-win.zip",
     "pack:linux": "powershell Compress-Archive -Path ./dist/rule-process-linux -DestinationPath ./dist/rule-process-linux.zip",
     "pack:macos": "powershell Compress-Archive -Path ./dist/rule-process-macos -DestinationPath ./dist/rule-process-macos.zip",
+    "clean": "node -e \"require('fs-extra').emptyDirSync('./dist')\"",
+    "clean:bin": "node ./config/clean.js ",
     "link:local": "npm link",
     "link:unlink": "npm unlink",
     "test:cli": "rule-process -v",
