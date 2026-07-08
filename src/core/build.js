@@ -19,20 +19,22 @@ async function generateBasic(inputPath, outputPath, rulesPath) {
         validatePaths(inputPath, outputPath, rulesPath);
         logDebug('校验所有路径地址结束', '\n');
 
-        logInfo('获取输入文件列表开始');
-        const inputArray = getInputArray(inputPath);
-        logInfo('获取输入文件列表结束', '\n');
-
+        // 先加载规则模块，获取 mode 决定读取策略
         logInfo('模板导入开始');
-        const ruleFun = loadRuleFun(rulesPath);
-        logInfo('模板导入结束', '\n');
+        const ruleModule = loadRuleModule(rulesPath);
+        logInfo('模板导入结束, 读取模式:', ruleModule.mode, '\n');
 
         logDebug('校验模板开始');
-        validateLoadRuleFun(ruleFun);
+        validateLoadRuleFun(ruleModule.process);
         logDebug('校验模板结束', '\n');
 
+        // 根据规则声明的 mode 决定输入读取方式
+        logInfo('获取输入文件列表开始');
+        const inputArray = getInputArray(inputPath, ruleModule.mode);
+        logInfo('获取输入文件列表结束', '\n');
+
         logInfo('生成输出开始');
-        await buildOutputArray(inputArray, ruleFun, outputPath);
+        await buildOutputArray(inputArray, ruleModule.process, outputPath);
         logInfo('生成输出结束', '\n');
 
         logInfo(`生成成功！`);
@@ -41,27 +43,27 @@ async function generateBasic(inputPath, outputPath, rulesPath) {
     }
 }
 
-function getInputArray(inputPath) {
+function getInputArray(inputPath, mode = 'full') {
     // 同步获取输入路径的文件系统状态信息
     // 返回一个 fs.Stats 对象，包含文件/目录的元数据
     const stat = fs.statSync(inputPath);
 
     // 如果是文件，直接返回文件内容
     if (stat.isFile()) {
-        const inputNode = loadInputNode(inputPath);
+        const inputNode = loadInputNode(inputPath, false, mode);
         logInfo( '获取文件:',inputPath);
         return new Array(inputNode);
     }
 
     // 如果是目录，递归获取所有内容
     if (stat.isDirectory()) {
-        return traverseDirectory(inputPath);
+        return traverseDirectory(inputPath, mode);
     }
 
     logError(`无效的输入路径: ${inputPath}`);
 }
 
-function loadInputNode(inputPath,isDirectory = false) {
+function loadInputNode(inputPath, isDirectory = false, mode = 'full') {
     //path.parse(inputPath): root、dir、base、ext、name
     const parsedPath = path.parse(inputPath);
     const baseInputNode = {
@@ -70,6 +72,22 @@ function loadInputNode(inputPath,isDirectory = false) {
         path: inputPath,
         isDirectory,
     }
+
+    // stream 模式：不读取内容，挂载 createReadStream 工厂方法
+    if (mode === 'stream') {
+        return {
+            ...baseInputNode,
+            content: null,
+            stream: (options = {}) => {//允许手动配置
+                const defaults = baseInputNode.encode === 'buffer'
+                    ? {} // 二进制模式不设 encoding 依旧是流
+                    : { encoding: 'utf-8' };//非 buffer 模式（文本场景）→ 补上 encoding: 'utf-8'，自动转成 UTF-8 字符串，方便直接处理文本
+                return fs.createReadStream(baseInputNode.path, { ...defaults, ...options });
+            }
+        }
+    }
+
+    // full 模式：原有行为，全量读取 content
     return {
         ...baseInputNode,
         content: isDirectory ? null : readFileWithLimit(baseInputNode)
@@ -77,7 +95,7 @@ function loadInputNode(inputPath,isDirectory = false) {
 }
 
 // 递归遍历目录的辅助函数
-function traverseDirectory(dirPath) {
+function traverseDirectory(dirPath, mode = 'full') {
     logInfo( '读取目录:',dirPath);
     const results = [];
 
@@ -89,14 +107,14 @@ function traverseDirectory(dirPath) {
         logDebug( '读取目录内容:',fullPath);
 
         const isDirectory = entry.isDirectory();
-        const inputNode = loadInputNode(fullPath,isDirectory);
+        const inputNode = loadInputNode(fullPath, isDirectory, mode);
 
         // 先添加当前条目路径
         results.push(inputNode);
 
         // 如果是目录则递归处理
         if (isDirectory) {
-            results.push(...traverseDirectory(fullPath))
+            results.push(...traverseDirectory(fullPath, mode))
         }
     }
 
@@ -104,12 +122,15 @@ function traverseDirectory(dirPath) {
 }
 
 //处理导入模板逻辑 require劫持
-function loadRuleFun(rulesPath){
+function loadRuleModule(rulesPath){
     logInfo( '加载模板规则地址:',rulesPath);
 
     try{
         const ruleData = require(rulesPath)
-        return ruleData.process
+        return {
+            process: ruleData.process,
+            mode: ruleData.mode || 'full' // 规则声明读取模式，默认 full
+        }
     }catch (e){
         // 如果找不到模块（只处理 MODULE_NOT_FOUND 错误），则尝试用宿主环境依赖
         if (e.code === 'MODULE_NOT_FOUND') {
