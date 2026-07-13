@@ -66,11 +66,13 @@ function getInputArray(inputPath, mode = 'full') {
 function loadInputNode(inputPath, isDirectory = false, mode = 'full') {
     //path.parse(inputPath): root、dir、base、ext、name
     const parsedPath = path.parse(inputPath);
+    const stat = fs.statSync(inputPath);
     const baseInputNode = {
         ...parsedPath,
         ...getEncNodeByExt(parsedPath.ext),//编码方式 和 标准化扩展名 normExt,encode
         path: inputPath,
         isDirectory,
+        size:isDirectory?0:stat.size,//文件字节数
     }
 
     // stream 模式：不读取内容，挂载 createReadStream 工厂方法
