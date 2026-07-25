@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const {logInfo,logError, logDebug} = require('../utils/log');
+const {logInfo,logError, logDebug, logVerbose} = require('../utils/log');
 const {validateLoadRuleFun, validateOutputNode, validatePaths} = require('../utils/validator');
 const {readFileWithLimit} = require('../utils/ruleRead');
 const {getEncNodeByExt,getRealEncodeByNode} = require('../utils/ruleExt2EncMap');
@@ -149,6 +149,15 @@ async function buildOutputArray(inputArray, ruleFun, outputPath) {
 
     const outputNodeTemplate = getOutputNodeTemplate(outputPath);
 
+    // 实时写入文件，但延迟打印日志，攒够一批再刷新
+    const pendingLogs = [];
+    const flushLogs = () => {
+        if (pendingLogs.length === 0) return;
+        // 统一刷新所有收集的日志
+        pendingLogs.forEach(({ fn, args }) => fn(...args));
+        pendingLogs.length = 0;//清空已打印的日志，释放内存
+    };
+
     try {
         const outputResult  = await ruleFun(inputArray, outputNodeTemplate);
 
@@ -171,16 +180,27 @@ async function buildOutputArray(inputArray, ruleFun, outputPath) {
             for await (const outputArray of outputResult) {
                 // 流式模式下也要校验单个节点的合法性
                 validateOutputNode(outputArray);
-                processOutputArray(outputArray);
+                processOutputArray(outputArray, pendingLogs);
+                // 日志缓冲上限，超过则立即刷新
+                if (pendingLogs.length >= 50) flushLogs();
             }
+            // 剩余日志统一刷新
+            flushLogs();
         }
     } catch (err) {
+        flushLogs(pendingLogs); // 异常兜底
         logError(`规则文件异常: ${err.message}`);
     }
 }
 
-function processOutputArray(outputArray) {
-    logDebug( '输出数组长度:',outputArray.length);
+function processOutputArray(outputArray, logBuffer = null) {
+    // 有 logBuffer 时日志推入缓冲区延迟打印，否则直接输出
+    const emit = (fn, ...args) => {
+        if (logBuffer) { logBuffer.push({ fn, args }); }
+        else { fn(...args); }
+    };
+
+    emit(logDebug, '输出数组长度:', outputArray.length);
     try {
         outputArray.forEach(node => {
             // 获取模板默认值（传入当前 node.path 以便支持动态路径）
@@ -192,7 +212,11 @@ function processOutputArray(outputArray) {
             // 判断 option 的encode字段是否存在
             // 如果为空，表示用户没有设置，使用自动匹配，如果不为空，使用用户设置的编码方式
             const encodeNode = getEncNodeByExt(mergedNode.normExt);
-            mergedOption.encode = mergedOption.encode ? mergedOption.encode : getRealEncodeByNode(encodeNode);
+            if(!mergedOption.encode){
+                mergedOption.encode = getRealEncodeByNode(encodeNode);
+                emit(logVerbose, `[${encodeNode.normExt}]使用[${encodeNode.encode}]编码类型解析`)
+            }
+
 
             const finalNode = Object.assign({}, mergedNode, { option: mergedOption });//合并最终的node
 
@@ -204,10 +228,10 @@ function processOutputArray(outputArray) {
             if (finalNode.isDirectory) {
                 // 创建目录（recursive模式避免重复创建）
                 createHostDir(fullPath)
-                logInfo('创建目录: ',fullPath)
+                emit(logInfo, '创建目录: ', fullPath)
             } else {
                 fullPath = path.join(fullPath, `${fileName}.${normExt}`); // 默认文件名
-                logDebug(`自动拼接文件名: ${fileName}.${normExt}`)
+                emit(logDebug, `自动拼接文件名: ${fileName}.${normExt}`)
 
                 // 确保父目录存在
                 const parentDir = path.dirname(fullPath);
@@ -215,7 +239,7 @@ function processOutputArray(outputArray) {
 
                 // 写入文件内容（根据规则覆盖或追加）
                 fs.writeFileSync(fullPath, finalNode.content, finalNode.option);
-                logInfo('创建文件: ',fullPath)
+                emit(logInfo, '创建文件: ', fullPath)
             }
         });
     } catch (err) {

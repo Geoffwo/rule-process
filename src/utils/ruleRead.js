@@ -1,6 +1,6 @@
 // utils/fileReader.js
 const fs = require("fs");
-const {logInfo,logError} = require("./log");
+const {logInfo,logError, logVerbose} = require("./log");
 const {getRealEncodeByNode} = require("./ruleExt2EncMap");
 let maxSize = 200 //mb
 let encode = null
@@ -29,6 +29,8 @@ function readFileWithLimit(inputNode) {
     }
 
     const finalEncode = encode || getRealEncodeByNode(inputNode);//根据扩展名 自适配编码方式
+    logVerbose(`[${inputNode.normExt}]使用[${inputNode.encode}]编码类型解析`)
+
     return fs.readFileSync(inputNode.path, finalEncode);
 }
 
