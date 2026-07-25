@@ -130,8 +130,17 @@ function preExtractModules(fileContent){
 
 function installModulesVersion(fileContent, extractModules) {
     const plugin = astParseExportData(fileContent);
+
+    const logStr = Object.entries(plugin.rely || {})
+        .map(([name, ver]) => `${name}@${ver}`)
+        .join(', ');
+    logDebug('提取插件所有依赖配置:',logStr);
+
     // 获取rely中的所有模块名（处理plugin.rely可能为undefined的情况）
     const relyModules = Object.keys(plugin.rely || {});
+
+    // 过滤掉本地已存在的rely模块，避免重复安装
+    const missingRelyModules = getFilteredInstallModules(relyModules);
 
     // 处理extractModules中的模块：按rely配置版本，无则用latest
     const processedExtract = extractModules.map(item => {
@@ -139,9 +148,9 @@ function installModulesVersion(fileContent, extractModules) {
         return version ? `${item}@${version}` : `${item}@latest`;
     });
 
-    // 处理rely中存在但不在extractModules中的额外模块
-    const additionalFromRely = relyModules
-        .filter(item => !extractModules.includes(item)) // 筛选不在extractModules中的模块
+    // 处理rely中存在但不在extractModules中且本地未安装的额外模块
+    const additionalFromRely = missingRelyModules
+        .filter(item => !extractModules.includes(item))
         .map(item => {
             const version = plugin.rely[item];
             return version ? `${item}@${version}` : `${item}@latest`;
