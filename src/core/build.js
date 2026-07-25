@@ -182,7 +182,7 @@ async function buildOutputArray(inputArray, ruleFun, outputPath) {
                 validateOutputNode(outputArray);
                 processOutputArray(outputArray, pendingLogs);
                 // 日志缓冲上限，超过则立即刷新
-                if (pendingLogs.length >= 50) flushLogs();
+                if (pendingLogs.length >= 200) flushLogs();
             }
             // 剩余日志统一刷新
             flushLogs();
