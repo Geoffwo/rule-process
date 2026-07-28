@@ -55,7 +55,7 @@ function getEncNodeByExt(ext) {
 }
 
 function getRealEncodeByNode(node) {
-    logVerbose(`[${node.normExt}]使用[${node.encode}]编码类型解析`);
+    // logVerbose(`[${node.normExt}]使用[${node.encode}]编码类型解析`);
     return node.encode === 'buffer' ? null : node.encode
 }
 
