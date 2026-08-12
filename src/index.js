@@ -22,27 +22,37 @@ function isInteractiveLaunch() {
     return !args.some(arg => knownCommands.includes(arg));
 }
 
-// 如果是双击启动（非终端调用或无参数）
-if (!process.stdin.isTTY || isInteractiveLaunch()) {
-    console.log('欢迎使用 Rule Process 工具！');
-    console.log('请在终端中运行本工具以获得完整功能。');
-    console.log('例如：rule-process -h 查看帮助');
-    console.log('\n即将以向导模式启动...（3秒后开始初始化）\n');
+// 无参数或未知首参时进入交互入口：
+// - 终端环境（TTY）→ 交互式 TUI 菜单
+// - 非终端（双击/管道）→ 保留定时向导模式
+if (isInteractiveLaunch()) {
+    if (process.stdin.isTTY) {
+        // 交互式 TUI
+        require('./interface/tui').runTui()
+            .then(() => process.exit(0))
+            .catch(err => logError('TUI 执行失败:', err.message || err));
+    } else {
+        // 如果是双击启动（非终端调用或无参数）
+        console.log('欢迎使用 Rule Process 工具！');
+        console.log('请在终端中运行本工具以获得完整功能。');
+        console.log('例如：rule-process -h 查看帮助');
+        console.log('\n即将以向导模式启动...（3秒后开始初始化）\n');
 
-    setTimeout(async () => {
-        try {
-            // 使用 IIFE 包裹异步操作
-            await (async () => {
-                await ruleProcess.click(); // 调用 click，内部判断是 init 还是 build
-            })();
-        } catch (error) {
-            logError('向导模式启动失败:', error.message);
-        } finally {
-            // 延迟退出，让用户看到结果
-            console.log('\n向导模式结束...（3秒后关闭）\n');
-            setTimeout(() => process.exit(0), 3000);
-        }
-    }, 3000);
+        setTimeout(async () => {
+            try {
+                // 使用 IIFE 包裹异步操作
+                await (async () => {
+                    await ruleProcess.click(); // 调用 click，内部判断是 init 还是 build
+                })();
+            } catch (error) {
+                logError('向导模式启动失败:', error.message);
+            } finally {
+                // 延迟退出，让用户看到结果
+                console.log('\n向导模式结束...（3秒后关闭）\n');
+                setTimeout(() => process.exit(0), 3000);
+            }
+        }, 3000);
+    }
 
     // 重要：提前返回，避免后续 parse 再次触发命令
     return;
@@ -89,7 +99,6 @@ program
     .command('init') // 子命令名称
     .description('使用默认配置快速构建演示案例，会直接覆盖examples文件')
     .option('-r, --run', '构建完成后自动运行演示案例')// 只要输入 --run标志 不需要参数，注释所有的入参都会被转换为字符串
-    .option('-k, --vosk', 'vosk功能专属创建，必须添加参数才能使用')
     .action(async (options) => {
         try {
             await ruleProcess.init(options)

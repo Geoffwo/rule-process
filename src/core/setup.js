@@ -85,17 +85,6 @@ async function init(options) {
     await createHostExamples();
     await createHostConfig(baseConfig);
 
-    if(options.vosk){//是否涉及vosk功能专属模块
-        const array=['vosk','ffi-napi','ref-napi','debug','ms','node-gyp-build','ref-struct-di']
-        await createHostRely(array);
-        const package={
-            "dependencies": {
-                "vosk": "^0.3.39"
-            }
-        }
-        await createHostPackage(package);
-    }
-
     if(options.run){//是否运行初始文件
         await build() // 直接使用 baseConfig 默认值
     }
@@ -113,9 +102,9 @@ async function install(plugins, options) {
     loadPlugin()
 }
 
-function list(options){
+async function list(options){
     //获取插件列表
-    listPlugin(options)
+    await listPlugin(options)
 }
 
 async function uninstall(plugins, options) {
