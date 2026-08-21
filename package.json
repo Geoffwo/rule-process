@@ -44,6 +44,7 @@
     "start": "rule-process -s",
     "start:init": "rule-process init",
     "start:run": "rule-process run",
+    "start:web": "rule-process web",
     "registry:npm": "npm config set registry https://registry.npmjs.org/",
     "registry:mirror": "npm config set registry https://registry.npmmirror.com/",
     "login:npm": "npm run registry:npm & npm login",
@@ -84,5 +85,12 @@
     "semver": "^7.7.1"
   },
   "dependencies": {
+    "@u4/opencv4nodejs": "^7.1.2",
+    "puppeteer": "^19.11.1",
+    "qrcode": "^1.5.4",
+    "robotjs": "^0.6.0",
+    "screenshot-desktop": "^1.15.4",
+    "uiohook-napi": "^1.5.5",
+    "xlsx": "^0.18.0"
   }
 }

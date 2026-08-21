@@ -6,6 +6,7 @@ const { program } = require('commander')
 const ruleProcess = require('./core/setup')
 const {loadHostConfig} = require('./utils/hosting')
 const {logError} = require('./utils/log')
+const { startServer } = require('./core/web');
 
 const baseConfig =  ruleProcess.baseConfig // 基础配置
 
@@ -16,7 +17,7 @@ function isInteractiveLaunch() {
 
     // 情况2: 只有一个选项，且不是已知命令（防误判）
     const args = process.argv.slice(2);
-    const knownCommands = ['run', 'init', 'install', 'list', 'uninstall', '-h', '--help', '-v', '--version'];
+    const knownCommands = ['run', 'init', 'install', 'list', 'uninstall', 'web', '-h', '--help', '-v', '--version'];
 
     // 如果第一个参数不是已知命令，则可能是误操作或双击
     return !args.some(arg => knownCommands.includes(arg));
@@ -106,6 +107,25 @@ program
            logError('默认构建失败:', error.message)
         }
     })
+
+// HTTP 服务指令：将规则处理能力通过 HTTP 接口暴露
+program
+    .command('web')
+    .description('启动 HTTP 服务，通过接口触发规则处理')
+    .option('-p, --port <port>', '端口号', '3000')
+    .option('-H, --host <host>', '主机地址', 'localhost')
+    .option('-c --config <configUrl>', '解析配置文件')
+    .action(async (options) => {
+        try {
+            startServer({
+                port: parseInt(options.port, 10),
+                host: options.host,
+                config: options.config
+            });
+        } catch (error) {
+            logError('HTTP 服务启动失败:', error.message);
+        }
+    });
 
 // 批量安装插件
 program
