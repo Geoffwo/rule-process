@@ -40,17 +40,7 @@ function isLaunchedFromTerminal() {
             .toString();
 
         //双击explorer.exe，其他一般是cmd之类的
-        const terminalLike = new Set([
-            'cmd.exe',
-            'powershell.exe',
-            'pwsh.exe',
-            'bash.exe',
-            'mintty.exe',
-            'wt.exe',
-            'windowsterminal.exe',
-        ]);
-
-        return terminalLike.has(out);
+        return /\b(cmd\.exe|powershell\.exe|pwsh\.exe)\b/i.test(out);
     } catch (e) {
         return false; // 探测失败保守走向导
     }
