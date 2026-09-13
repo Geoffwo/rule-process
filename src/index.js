@@ -23,12 +23,45 @@ function isInteractiveLaunch() {
     return !args.some(arg => knownCommands.includes(arg));
 }
 
+// 判断当前进程是否由终端（CMD / PowerShell）启动：
+// - 在 CMD / PowerShell 中敲命令启动 → 父进程为 cmd.exe / powershell.exe → 视为“终端” → 进入 TUI 菜单
+// - 双击 exe 启动 → 父进程为 explorer.exe → 视为“非终端” → 进入引导向导
+function isLaunchedFromTerminal() {
+    if (process.platform !== 'win32') {
+        return !!process.stdin.isTTY; // 非 Windows 平台回退到原 isTTY 行为
+    }
+
+    try {
+        const ppid = process.ppid;
+        if (!ppid) return false;
+
+        const out = require('child_process')
+            .execSync(`tasklist /fi "PID eq ${ppid}" /nh`, { windowsHide: true })
+            .toString();
+
+        //双击explorer.exe，其他一般是cmd之类的
+        const terminalLike = new Set([
+            'cmd.exe',
+            'powershell.exe',
+            'pwsh.exe',
+            'bash.exe',
+            'mintty.exe',
+            'wt.exe',
+            'windowsterminal.exe',
+        ]);
+
+        return terminalLike.has(out);
+    } catch (e) {
+        return false; // 探测失败保守走向导
+    }
+}
+
 // 无参数或未知首参时进入交互入口：
-// - 终端环境（TTY）→ 交互式 TUI 菜单
-// - 非终端（双击/管道）→ 保留定时向导模式
+// - 终端环境（CMD / PowerShell）→ 交互式 TUI 菜单
+// - 双击 exe（非终端）→ 引导向导模式
 if (isInteractiveLaunch()) {
-    if (process.stdin.isTTY) {
-        // 交互式 TUI
+    if (isLaunchedFromTerminal()) {
+        // 交互式 TUI（由终端启动）
         require('./interface/tui').runTui()
             .then(() => process.exit(0))
             .catch(err => logError('TUI 执行失败:', err.message || err));
