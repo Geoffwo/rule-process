@@ -17,7 +17,7 @@ function isInteractiveLaunch() {
 
     // 情况2: 只有一个选项，且不是已知命令（防误判）
     const args = process.argv.slice(2);
-    const knownCommands = ['run', 'init', 'install', 'list', 'uninstall', 'web', '-h', '--help', '-v', '--version'];
+    const knownCommands = ['run', 'init', 'install', 'list', 'uninstall', 'web', 'mcp', '-h', '--help', '-v', '--version'];
 
     // 如果第一个参数不是已知命令，则可能是误操作或双击
     return !args.some(arg => knownCommands.includes(arg));
@@ -147,6 +147,19 @@ program
             });
         } catch (error) {
             logError('HTTP 服务启动失败:', error.message);
+        }
+    });
+
+// MCP 服务指令：将规则处理能力暴露为 MCP 工具（供 LLM agent 通过 MCP 协议调用）
+program
+    .command('mcp')
+    .description('启动 MCP 服务，将规则处理暴露为 MCP 工具（run_rule / list_plugins / install_plugin）')
+    .action(async () => {
+        try {
+            const { startMcpServer } = require('./core/mcp');
+            await startMcpServer();
+        } catch (error) {
+            logError('MCP 服务启动失败:', error.message);
         }
     });
 

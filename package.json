@@ -72,6 +72,7 @@
   "author": "geoffwo",
   "license": "ISC",
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "@yao-pkg/pkg": "^6.22.0",
     "acorn": "^8.14.1",
     "acorn-walk": "^8.3.4",
