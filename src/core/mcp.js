@@ -158,4 +158,4 @@ async function startMcpServer(options = {}) {
     return server;
 }
 
-module.exports = { startMcpServer, createMcpServer };
+module.exports = { startMcpServer };

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const {logInfo,logError, logDebug, logVerbose} = require('../utils/log');
-const {validateLoadRuleFun, validateOutputNode, validatePaths} = require('../utils/validator');
+const {validateLoadRuleFun, validateWatchFun, validateOutputNode, validatePaths} = require('../utils/validator');
 const {readFileWithLimit} = require('../utils/ruleRead');
 const {getEncNodeByExt,getRealEncodeByNode} = require('../utils/ruleExt2EncMap');
 const {getOutputNodeDoc,getOutputNodeTemplate} = require('../utils/ruleWriter');
@@ -27,6 +27,20 @@ async function generateBasic(inputPath, outputPath, rulesPath) {
         logDebug('校验模板开始');
         validateLoadRuleFun(ruleModule.process);
         logDebug('校验模板结束', '\n');
+
+        //分支：规则声明了 watch → 挂常驻订阅（watch 只负责传递 inputArray，
+        //首轮 process 仍由下方主流程照常执行一次）
+        if (ruleModule.watch) {
+            logDebug('校验订阅模式开始');
+            validateWatchFun(ruleModule.watch); // watch 一旦声明必须是函数
+            logDebug('校验订阅模式结束', '\n');
+
+            // 惰性 require：避免 build ↔ watch 顶部互相 require 形成循环依赖
+            logInfo('订阅模式开始');
+            const { startWatch } = require('./watch');
+            startWatch(inputPath, outputPath, ruleModule);
+            logInfo('订阅模式结束', '\n');
+        }
 
         // 根据规则声明的 mode 决定输入读取方式
         logInfo('获取输入文件列表开始');
@@ -131,7 +145,8 @@ function loadRuleModule(rulesPath){
         const ruleData = require(rulesPath)
         return {
             process: ruleData.process,
-            mode: ruleData.mode || 'full' // 规则声明读取模式，默认 full
+            mode: ruleData.mode || 'full', // 规则声明读取模式，默认 full
+            watch: ruleData.watch          // 可选常驻订阅触发器，未声明则为 undefined
         }
     }catch (e){
         // 如果找不到模块（只处理 MODULE_NOT_FOUND 错误），则尝试用宿主环境依赖
@@ -248,6 +263,7 @@ function processOutputArray(outputArray, logBuffer = null) {
 }
 
 module.exports = {
-    generateBasic
+    generateBasic,
+    getInputArray
 };
 

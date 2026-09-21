@@ -16,10 +16,25 @@ function validatePaths(...paths) {
 function validateLoadRuleFun(ruleFun) {
     // 检查是否导出函数
     if (typeof ruleFun !== 'function') {
-        logError('规则文件必须导出一个函数');
+        logError('规则文件必须导出一个process函数');
     }
 
     return ruleFun;
+}
+
+/**
+ * 校验可选的 watch 字段
+ * 约定：watch 可以不写（不启用常驻订阅）；一旦写了，就必须是函数
+ * @param {*} watch - 规则导出的 watch 字段
+ * @returns {Function|undefined}
+ */
+function validateWatchFun(watch) {
+    // 声明了但不是函数：契约违例
+    if (typeof watch !== 'function') {
+        logError('规则文件的 watch 必须是一个函数');
+    }
+
+    return watch;
 }
 
 
@@ -143,6 +158,7 @@ module.exports = {
     validatePaths,
     validateOutputNode,
     validateLoadRuleFun,
+    validateWatchFun,
     validateInstallModules,
     validateUninstallModules,
     validatePlugin
