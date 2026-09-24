@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const {logInfo,logError, logDebug, logVerbose} = require('../utils/log');
-const {validateLoadRuleFun, validateWatchFun, validateOutputNode, validatePaths} = require('../utils/validator');
+const {logInfo,logError, logDebug, logVerbose, logWarn} = require('../utils/log');
+const {validateLoadRuleFun, validateOutputNode, validatePaths} = require('../utils/validator');
 const {readFileWithLimit} = require('../utils/ruleRead');
 const {getEncNodeByExt,getRealEncodeByNode} = require('../utils/ruleExt2EncMap');
 const {getOutputNodeDoc,getOutputNodeTemplate} = require('../utils/ruleWriter');
@@ -28,27 +28,22 @@ async function generateBasic(inputPath, outputPath, rulesPath) {
         validateLoadRuleFun(ruleModule.process);
         logDebug('校验模板结束', '\n');
 
-        //分支：规则声明了 watch → 挂常驻订阅（watch 只负责传递 inputArray，
-        //首轮 process 仍由下方主流程照常执行一次）
-        if (ruleModule.watch) {
-            logDebug('校验订阅模式开始');
-            validateWatchFun(ruleModule.watch); // watch 一旦声明必须是函数
-            logDebug('校验订阅模式结束', '\n');
-
-            // 惰性 require：避免 build ↔ watch 顶部互相 require 形成循环依赖
-            logInfo('订阅模式开始');
-            const { startWatch } = require('./watch');
-            startWatch(inputPath, outputPath, ruleModule);
-            logInfo('订阅模式结束', '\n');
-        }
-
         // 根据规则声明的 mode 决定输入读取方式
         logInfo('获取输入文件列表开始');
         const inputArray = getInputArray(inputPath, ruleModule.mode);
         logInfo('获取输入文件列表结束', '\n');
 
+        // 规则上下文（拉模型）：refreshInput 立即重算全量输入快照
+        // 仅在生成器内调用有顺序保证：之前 yield 的节点已被引擎同步落盘
+        const ctx = {
+            refreshInput: () => getInputArray(inputPath, ruleModule.mode),
+            refreshDir: (dir, mode) => getInputArray(dir, mode || ruleModule.mode),
+            // 分级日志：与引擎同源，受 -d（静默）/-l（级别）控制；error 会终止进程
+            logInfo, logWarn, logError, logDebug, logVerbose,
+        };
+
         logInfo('生成输出开始');
-        await buildOutputArray(inputArray, ruleModule.process, outputPath);
+        await buildOutputArray(inputArray, ruleModule.process, outputPath, ctx);
         logInfo('生成输出结束', '\n');
 
         logInfo(`生成成功！`);
@@ -145,8 +140,7 @@ function loadRuleModule(rulesPath){
         const ruleData = require(rulesPath)
         return {
             process: ruleData.process,
-            mode: ruleData.mode || 'full', // 规则声明读取模式，默认 full
-            watch: ruleData.watch          // 可选常驻订阅触发器，未声明则为 undefined
+            mode: ruleData.mode || 'full' // 规则声明读取模式，默认 full
         }
     }catch (e){
         // 如果找不到模块（只处理 MODULE_NOT_FOUND 错误），则尝试用宿主环境依赖
@@ -158,7 +152,7 @@ function loadRuleModule(rulesPath){
     }
 }
 
-async function buildOutputArray(inputArray, ruleFun, outputPath) {
+async function buildOutputArray(inputArray, ruleFun, outputPath, ctx) {
     const outputNodeDoc = getOutputNodeDoc(outputPath);
     logInfo('导出对象数组,其中 node模板:\n', outputNodeDoc, '\n');
 
@@ -174,7 +168,7 @@ async function buildOutputArray(inputArray, ruleFun, outputPath) {
     };
 
     try {
-        const outputResult  = await ruleFun(inputArray, outputNodeTemplate);
+        const outputResult  = await ruleFun(inputArray, outputNodeTemplate, ctx);
 
         // 处理 ruleFun 没有返回值的情况
         if (outputResult === undefined) {
