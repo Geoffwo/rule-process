@@ -6,7 +6,7 @@ async function* writingRules(inputArray, outputNodeTemplate, ctx) {
 
     // 逐份产出输出节点
     for (const name of ['demo_alpha', 'demo_beta', 'demo_gamma']) {
-        ctx.log.info(`[process] yield 种子文件 -> ${inputDir}/${name}.txt`);
+        ctx.logInfo(`[process] yield 种子文件 -> ${inputDir}/${name}.txt`);
         yield [{
             ...outputNodeTemplate,
             path: inputDir,
@@ -19,7 +19,7 @@ async function* writingRules(inputArray, outputNodeTemplate, ctx) {
     // 拉取最新快照
     const input = ctx.refreshInput();
     const files = input.filter(item => item.name.startsWith('demo_'));
-    ctx.log.info(`[process] refreshInput 拿到 ${files.length} 个文件: ${files.map(n => n.base).join(', ')}`);
+    ctx.logInfo(`[process] refreshInput 拿到 ${files.length} 个文件: ${files.map(n => n.base).join(', ')}`);
 
     // 基于新快照产出汇总输出（全量重写 outputDir）
     yield [{
@@ -34,7 +34,7 @@ async function* writingRules(inputArray, outputNodeTemplate, ctx) {
     // 拉取指定目录
     const output = ctx.refreshDir(outputDir);
     const result = output.filter(item => item.name.startsWith('summary'));
-    ctx.log.info(`[process] refreshDir 拿到 ${result.length} 个文件: ${result.map(n => n.base).join(', ')}`);
+    ctx.logInfo(`[process] refreshDir 拿到 ${result.length} 个文件: ${result.map(n => n.base).join(', ')}`);
 }
 
 module.exports = {

@@ -6,6 +6,7 @@ const {readFileWithLimit} = require('../utils/ruleRead');
 const {getEncNodeByExt,getRealEncodeByNode} = require('../utils/ruleExt2EncMap');
 const {getOutputNodeDoc,getOutputNodeTemplate} = require('../utils/ruleWriter');
 const {createHostDir} = require('../utils/hosting');
+const pluginSystem = require('../interface/plugin');
 
 /**
  * 自动读取规则
@@ -40,6 +41,8 @@ async function generateBasic(inputPath, outputPath, rulesPath) {
             refreshDir: (dir, mode) => getInputArray(dir, mode || ruleModule.mode),
             // 分级日志：与引擎同源，受 -d（静默）/-l（级别）控制；error 会终止进程
             logInfo, logWarn, logError, logDebug, logVerbose,
+            // 插件获取：返回插件的 process 处理器；找不到插件 logError 终止
+            getPlugin: (name) => pluginSystem.get(name),
         };
 
         logInfo('生成输出开始');

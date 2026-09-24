@@ -63,30 +63,12 @@ class PluginSystem {
     get(name) {
         if (!this.plugins.has(name)) {
             // 返回空处理器 + 警告日志
-            logError(`找不到插件: ${name}`);
+            logError(`找不到插件: ${name}，请使用 rule-process install 《插件名》 安装 或 手动放入plugin目录`);
         }
         return this.plugins.get(name).process;
     }
 }
 
-// 核心改动：全局初始化逻辑
-(function initGlobalPluginSystem() {
-    // 确保只初始化一次
-    if (!global.__PLUGIN_SYSTEM_INITIALIZED__) {
-        // 1. 创建插件系统实例
-        const pluginSystem = new PluginSystem();
-
-        // 2. 挂载到全局对象
-        global.pluginSystem = pluginSystem;
-        global.getPlugin = pluginSystem.get.bind(pluginSystem);
-
-        // 3. 标记初始化状态
-        global.__PLUGIN_SYSTEM_INITIALIZED__ = true;
-
-        // 4. 记录日志
-        // logVerbose('插件系统已挂载到全局\n');//无法根据指令控制日志等级，日志不记录
-    }
-})();
-
-// 导出实例（保持原有模块兼容性）
-module.exports = global.pluginSystem;
+// 插件系统单例：require 的模块缓存保证全局唯一实例；
+// 消费方（core/plugin.js、core/build.js 的 ctx）一律显式 require 注入
+module.exports = new PluginSystem();

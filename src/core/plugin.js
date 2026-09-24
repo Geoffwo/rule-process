@@ -7,6 +7,7 @@ const {detectHostPlugin,createHostDir} = require('../utils/hosting');
 const {validatePlugin} = require('../utils/validator');
 const {astParseExportData} = require('../utils/ast');
 const {preInstallPluginModules,preUninstallPluginModules} = require("../preprocess/modules");
+const pluginSystem = require('../interface/plugin');
 
 async function installPlugins(plugins, options) {
     logInfo(`插件安装开始`);
