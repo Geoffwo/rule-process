@@ -18,13 +18,13 @@ function preInstallModules(rulesPath) {
 
         // 3.独立抽取的模块过滤方法
         const installModules = getFilteredInstallModules(extractModules)
-        if (installModules.length === 0) {
+
+        // 4.获取插件npm依赖的版本信息（含 rely 声明但未 require 引用的依赖）
+        installList = installModulesVersion(fileContent,installModules);
+        if (installList.length === 0) {
             logWarn(`无缺失依赖，跳过 install`);
             return;
         }
-
-        // 4.获取插件npm依赖的版本信息
-        installList = installModulesVersion(fileContent,installModules);
         logDebug(`模块变更 install 版本:`, installList.join(', '));
 
         // 5.批量安装缺失模块
