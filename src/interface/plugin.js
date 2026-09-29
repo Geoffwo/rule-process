@@ -63,7 +63,7 @@ class PluginSystem {
     get(name) {
         if (!this.plugins.has(name)) {
             // 返回空处理器 + 警告日志
-            logError(`找不到插件: ${name}，请使用 rule-process install 《插件名》 安装 或 手动放入plugin目录`);
+            logError(`找不到插件: ${name}，请使用【rule-process-xxx install ${name}】安装 或 手动放入plugin目录`);
         }
         return this.plugins.get(name).process;
     }
