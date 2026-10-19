@@ -13,8 +13,9 @@ const pluginSystem = require('../interface/plugin');
  * @param {string} inputPath - 输入路径（文件或目录）
  * @param {string} outputPath - 输出路径（文件或目录）
  * @param {string} rulesPath - 模板规则文件路径
+ * @param {Object} [vars] - 运行时变量（CLI -p / WEB body.vars 注入，内存态不落盘）
  */
-async function generateBasic(inputPath, outputPath, rulesPath) {
+async function generateBasic(inputPath, outputPath, rulesPath, vars) {
     try {
         logDebug('校验所有路径地址开始');
         validatePaths(inputPath, outputPath, rulesPath);
@@ -43,6 +44,9 @@ async function generateBasic(inputPath, outputPath, rulesPath) {
             logInfo, logWarn, logError, logDebug, logVerbose,
             // 插件获取：返回插件的 process 处理器；找不到插件 logError 终止
             getPlugin: (name) => pluginSystem.get(name),
+            // 运行时变量：CLI -p / WEB body.vars 注入，内存态不落盘；不用 vars 的规则零影响（兜底 {}）
+            // 规则消费示例：renderTemplate(tpl, { ...item.params, ...ctx.vars })（vars 覆盖 params，同 key vars 胜）
+            vars: vars || {},
         };
 
         logInfo('生成输出开始');

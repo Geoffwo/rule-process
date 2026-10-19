@@ -104,12 +104,35 @@ program
     .option('-e, --encode <encode>', '强制指定输入文件编码')
     .option('-l, --level <level>', '强制更改日志等级')
     .option('-c --config <configUrl>', '解析配置文件')
+    .option('-p, --param <k=v>', '运行时变量注入（可重复，值支持 JSON：-p ak=xxx -p list=[1,2] -p obj={\\"a\\":\\"b\\"}）', (v, acc) => acc.concat(v), []) //obj={\"a\":\"b\"}
     .action(async (options) => {
         try {
             const parseConfig = loadHostConfig(options.config,baseConfig);
+
+            // 解析 -p 注入的运行时变量：值智能解析（JSON.parse 失败则保留字符串）
+            const vars = {};
+            if (Array.isArray(options.param)) {
+                for (const pair of options.param) {
+                    const eq = pair.indexOf('=');
+                    if (eq === -1) continue;
+
+                    const key = pair.slice(0, eq).trim();
+                    let value = pair.slice(eq + 1);
+
+                    if (!key) continue;
+                    console.log(value);
+                    try {
+                        value = JSON.parse(value);
+                    } catch { /* 非合法 JSON，保留字符串 */ }
+
+                    vars[key] = value;
+                }
+            }
+
             const finalConfig = {
                 ...parseConfig,  // 解析配置文件
-                ...options // 命令行选项（最高优先级）
+                ...options, // 命令行选项（最高优先级）
+                vars // 运行时变量（内存态，不落盘；显式调用注入，区别于已废弃的 env 隐式全局）
             };
 
             await ruleProcess.build(finalConfig);

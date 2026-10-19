@@ -56,7 +56,8 @@ async function build(options={}){
     const {
         input=baseConfig.input,
         output=baseConfig.output,
-        rule=baseConfig.rule
+        rule=baseConfig.rule,
+        vars // 运行时变量（CLI -p / WEB body.vars 注入，内存态不落盘）
     }=options
 
     //通用配置 处理option其他参数
@@ -72,7 +73,7 @@ async function build(options={}){
         await preInstallRuleModules(ruleFile);
 
         //自动读取规则 核心
-        await generateBasic(input, output, ruleFile);
+        await generateBasic(input, output, ruleFile, vars);
     }
 }
 

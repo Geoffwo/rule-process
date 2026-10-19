@@ -50,7 +50,8 @@ async function tuiRun() {
         { type: 'toggle', name: 'display', message: '关闭所有日志输出 (-d, --display)', initial: false, active: '是', inactive: '否' },
         { type: 'number', name: 'size', message: '读取文件大小安全限制 MB (-s, --size)', initial: 200, min: 1 },
         { type: 'text', name: 'encode', message: '强制输入编码 (-e, --encode)，留空自动适配', initial: '' },
-        { type: 'text', name: 'level', message: '日志等级 1-5 或名称 (-l, --level)，留空默认', initial: '' }
+        { type: 'text', name: 'level', message: '日志等级 1-5 或名称 (-l, --level)，留空默认', initial: '' },
+        { type: 'text', name: 'param', message: '运行时变量 k=v，多对用 ; 分隔（留空跳过），如 ak=xxx;count=5;list=[1,2];obj={"a":1,"b":"2"}', initial: '' }
     ], cancelOptions);
 
     if (!result) return;
@@ -64,6 +65,30 @@ async function tuiRun() {
     };
     if (result.encode) options.encode = result.encode;
     if (result.level) options.level = result.level;
+
+    // 解析运行时变量 -p/--param：值智能解析（JSON.parse 失败则保留字符串，与 CLI run 对齐）
+    if (result.param) {
+        const vars = {};
+        const filter = result.param.split(';').map(s => s.trim()).filter(Boolean);
+        for (const pair of filter) {
+            const eq = pair.indexOf('=');
+            if (eq === -1) continue;
+
+            const key = pair.slice(0, eq).trim();
+            let value = pair.slice(eq + 1);
+
+            if (!key) continue;
+            try {
+                value = JSON.parse(value);
+            } catch { /* 非合法 JSON，保留字符串 */ }
+
+            vars[key] = value;
+        }
+
+        if (Object.keys(vars).length){
+            options.vars = vars;
+        }
+    }
 
     await setup.build(options);
 }
