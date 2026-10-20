@@ -37,6 +37,7 @@ async function generateBasic(inputPath, outputPath, rulesPath, vars) {
 
         // 规则上下文（拉模型）：refreshInput 立即重算全量输入快照
         // 仅在生成器内调用有顺序保证：之前 yield 的节点已被引擎同步落盘
+        logInfo('上下文载入开始');
         const ctx = {
             refreshInput: () => getInputArray(inputPath, ruleModule.mode),
             refreshDir: (dir, mode) => getInputArray(dir, mode || ruleModule.mode),
@@ -48,6 +49,14 @@ async function generateBasic(inputPath, outputPath, rulesPath, vars) {
             // 规则消费示例：renderTemplate(tpl, { ...item.params, ...ctx.vars })（vars 覆盖 params，同 key vars 胜）
             vars: vars || {},
         };
+
+        // 最小改动：替换 logInfo('载入');
+        const ctxFuncList = Object.entries(ctx)
+                                          .filter(([_, val]) => typeof val === 'function')
+                                          .map(([k]) => k);
+        logInfo(`载入ctx.函数方法: [${ctxFuncList.join(',')}]`);
+        logInfo(`载入ctx.vars显式属性: ${JSON.stringify(ctx.vars)}`);
+        logInfo('上下文载入结束\n');
 
         logInfo('生成输出开始');
         await buildOutputArray(inputArray, ruleModule.process, outputPath, ctx);

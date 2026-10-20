@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 require('./interface/plugin'); // 确保初始化最先执行 插件系统挂载到全局
 
-const path = require("path");
 const { program } = require('commander')
 const ruleProcess = require('./core/setup')
 const {loadHostConfig} = require('./utils/hosting')
@@ -120,7 +119,6 @@ program
                     let value = pair.slice(eq + 1);
 
                     if (!key) continue;
-                    console.log(value);
                     try {
                         value = JSON.parse(value);
                     } catch { /* 非合法 JSON，保留字符串 */ }
