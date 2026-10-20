@@ -9,6 +9,8 @@ async function* writingRules(inputArray, outputNodeTemplate, ctx) {
         return;
     }
 
+    console.log(`传入变量 -p: ${ctx.vars}`)
+
     // 3. 逐个经插件加工后产出
     for (const node of textNodes) {
         ctx.logInfo(`插件加工: ${node.base}`);
@@ -24,6 +26,7 @@ async function* writingRules(inputArray, outputNodeTemplate, ctx) {
 module.exports = {
     name: 'demo04',
     version: '1.0.0',
+    disable: true,
     process: writingRules,
     description: 'ctx.getPlugin 示例：经插件处理器把 .txt 输入转为大写，产出 *_upper.txt'
 };
